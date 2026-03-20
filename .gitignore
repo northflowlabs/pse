@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Environment / secrets — never commit
+.env
+.env.local
+.env.*.local
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data — never commit raw geospatial data
+*.nc
+*.zarr/
+*.grib
+*.tif
+*.geotiff
+data/
+
+# Test artefacts
+.pytest_cache/
+htmlcov/
+coverage.xml
+.coverage
+
+# Logs
+*.log

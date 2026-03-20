@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Northflow PSE: Planetary Sensing Engine"
+version: 0.1.0
+date-released: "2026-03-21"
+url: "https://github.com/northflowlabs/pse"
+repository-code: "https://github.com/northflowlabs/pse"
+license: Apache-2.0
+authors:
+  - family-names: Pedersen
+    given-names: Tom Danny
+    email: tdp@northflow.no
+    affiliation: "Northflow Technologies AS"
+keywords:
+  - earth-observation
+  - data-fusion
+  - climate
+  - remote-sensing
+  - xarray
+  - pangeo
+  - planetary-intelligence
+  - era5
+  - sentinel-2
+  - geospatial
+abstract: >-
+  PSE (Planetary Sensing Engine) is an open-source Python framework
+  for ingesting, normalising, and fusing multi-source Earth observation
+  and environmental data into unified, queryable xarray Datasets.
+  It provides quality-weighted fusion across 6+ data sources
+  (ERA5, Open-Meteo, Global Solar Atlas, Sentinel-2, OpenStreetMap,
+  World Bank), a FastAPI REST API, Zarr-native storage, PostgreSQL/PostGIS
+  metadata, and full data provenance tracking.

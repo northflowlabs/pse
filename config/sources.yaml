@@ -1,0 +1,35 @@
+sources:
+  open_meteo:
+    base_url: "https://archive-api.open-meteo.com/v1/archive"
+    forecast_url: "https://api.open-meteo.com/v1/forecast"
+    update_frequency_seconds: 3600
+    spatial_resolution_m: 11000
+    reliability: 0.88
+
+  global_solar_atlas:
+    base_url: "https://api.globalsolaratlas.info/data"
+    update_frequency_seconds: 86400
+    spatial_resolution_m: 1000
+    reliability: 0.92
+
+  era5:
+    base_url: "https://cds.climate.copernicus.eu/api"
+    update_frequency_seconds: 86400
+    spatial_resolution_m: 27800
+    reliability: 0.97
+
+  sentinel2:
+    base_url: "https://catalogue.dataspace.copernicus.eu/odata/v1"
+    update_frequency_seconds: 432000   # 5 days revisit
+    spatial_resolution_m: 10
+    reliability: 0.95
+
+  osm:
+    base_url: "https://overpass-api.de/api/interpreter"
+    update_frequency_seconds: 604800   # weekly
+    reliability: 0.80
+
+  world_bank:
+    base_url: "https://api.worldbank.org/v2"
+    update_frequency_seconds: 2592000  # monthly
+    reliability: 0.90
