@@ -19,17 +19,15 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 import xarray as xr
 
-from pse.connectors.base import BaseConnector, DataQuality, SpatialBounds, TemporalBounds
+from pse.connectors.base import SpatialBounds, TemporalBounds
 from pse.fusion.grid import make_regular_grid, regrid_dataset
-from pse.fusion.quality import compute_weights, quality_weighted_merge, detect_conflicts
+from pse.fusion.quality import compute_weights, detect_conflicts, quality_weighted_merge
 from pse.fusion.temporal import align_to_common_axis
 from pse.query.engine import QueryEngine
-from pse.store.cache import PSECache
 
 log = logging.getLogger(__name__)
 
@@ -72,7 +70,7 @@ class FusionEngine:
         spatial: SpatialBounds,
         temporal: TemporalBounds,
         resolution_m: float = 5_000.0,
-        prefer_recent: Optional[bool] = None,
+        prefer_recent: bool | None = None,
     ) -> xr.Dataset:
         """
         Execute a fused multi-source query.
@@ -136,7 +134,7 @@ class FusionEngine:
         sources_used: list[str] = []
         errors: dict[str, str] = {}
 
-        for src_id, result in zip(connector_map.keys(), raw_datasets):
+        for src_id, result in zip(connector_map.keys(), raw_datasets, strict=False):
             if isinstance(result, Exception):
                 log.warning("[fusion] Connector '%s' failed: %s", src_id, result)
                 errors[src_id] = str(result)
@@ -237,11 +235,11 @@ class FusionEngine:
         return {
             "pse_version": _PSE_VERSION,
             "pse_fusion": True,
-            "pse_query_time": datetime.now(timezone.utc).isoformat(),
+            "pse_query_time": datetime.now(UTC).isoformat(),
             "pse_sources_used": sources_used,
             "pse_source_quality_scores": {
                 src: round(q, 4)
-                for src, q in zip(sources_used, quality_scores)
+                for src, q in zip(sources_used, quality_scores, strict=False)
             },
             "pse_variables": variables,
             "pse_spatial": spatial.to_dict(),

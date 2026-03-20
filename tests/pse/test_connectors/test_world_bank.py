@@ -4,7 +4,7 @@ Tests for the World Bank connector.
 from __future__ import annotations
 
 from datetime import datetime
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -78,8 +78,6 @@ class TestWorldBankUnit:
 
     @pytest.mark.asyncio
     async def test_fetch_returns_valid_dataset(self, connector):
-        mock_response = _mock_wb_response("EG.ELC.ACCS.ZS", ["IDN"])
-
         async def mock_fetch_indicator(var, countries, year_start, year_end):
             return {"IDN": {y: 85.0 + y - 2015 for y in range(year_start, year_end + 1)}}
 

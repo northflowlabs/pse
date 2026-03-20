@@ -3,8 +3,7 @@ PSE Base Connector — abstract interface all data source connectors must implem
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 import xarray as xr
 
@@ -144,7 +143,7 @@ class BaseConnector(ABC):
         variables: list[str],
         spatial: SpatialBounds,
         temporal: TemporalBounds,
-        resolution: Optional[float] = None,
+        resolution: float | None = None,
     ) -> xr.Dataset:
         """Fetch data from this source.
 
@@ -206,7 +205,7 @@ class BaseConnector(ABC):
         """Build the standard PSE provenance attributes for a Dataset."""
         return {
             "pse_source": self.source_id,
-            "pse_fetched_at": datetime.now(timezone.utc).isoformat(),
+            "pse_fetched_at": datetime.now(UTC).isoformat(),
             "pse_variables": variables,
             "pse_spatial": spatial.to_dict(),
             "pse_temporal": temporal.to_dict(),

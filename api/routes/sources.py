@@ -3,6 +3,8 @@ GET /api/v1/sources — list available data sources and their metadata.
 """
 from __future__ import annotations
 
+from datetime import UTC
+
 from fastapi import APIRouter, Depends, Request
 
 from pse.api.middleware.auth import verify_api_key
@@ -37,7 +39,7 @@ async def source_status(
     _key: str = Depends(verify_api_key),
 ):
     """Return detailed status for a specific connector."""
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     engine = request.app.state.query_engine
     connector = engine._connectors.get(source_id)
@@ -47,7 +49,7 @@ async def source_status(
 
     try:
         latest_ts = await connector.get_latest_timestamp()
-        lag = (datetime.now(timezone.utc) - latest_ts.replace(tzinfo=timezone.utc)).total_seconds()
+        lag = (datetime.now(UTC) - latest_ts.replace(tzinfo=UTC)).total_seconds()
         return {
             "source_id": source_id,
             "status": "ok",

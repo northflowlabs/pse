@@ -23,8 +23,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 import httpx
 import numpy as np
@@ -92,7 +91,7 @@ class OSMConnector(BaseConnector):
         variables: list[str],
         spatial: SpatialBounds,
         temporal: TemporalBounds,
-        resolution: Optional[float] = None,
+        resolution: float | None = None,
     ) -> xr.Dataset:
         """
         Fetch OSM infrastructure features for the bounding box.
@@ -140,7 +139,7 @@ class OSMConnector(BaseConnector):
         )
 
     async def get_latest_timestamp(self) -> datetime:
-        return datetime.now(timezone.utc)
+        return datetime.now(UTC)
 
     # ------------------------------------------------------------------
     # Overpass queries

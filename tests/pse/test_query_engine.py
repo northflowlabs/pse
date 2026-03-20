@@ -3,8 +3,7 @@ Tests for the PSE QueryEngine.
 """
 from __future__ import annotations
 
-from datetime import datetime
-from unittest.mock import AsyncMock
+from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
@@ -48,8 +47,7 @@ def _make_mock_connector(source_id: str, variables: list[str]) -> object:
             return DataQuality(0.99, 0.0, 11000, 0.88)
 
         async def get_latest_timestamp(self):
-            from datetime import timezone
-            return datetime.now(timezone.utc)
+            return datetime.now(UTC)
 
     return MockConnector()
 

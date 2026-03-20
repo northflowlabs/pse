@@ -6,7 +6,6 @@ a missing key is allowed through so the API can be tested without setup.
 """
 from __future__ import annotations
 
-import hashlib
 import os
 import secrets
 

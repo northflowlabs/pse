@@ -18,7 +18,7 @@
 
 ---
 
-**Northflow Technologies** builds institutional scientific discovery infrastructure for climate, Earth observation, and critical systems. PSE is our open-source data foundation — the sensing layer that powers every Northflow domain adapter.
+**Northflow Technologies** builds institutional scientific discovery infrastructure for climate, Earth observation, and critical systems. PSE is our open-source data foundation — the sensing and data fusion layer of the Northflow platform.
 
 ## What is PSE?
 
@@ -167,13 +167,23 @@ See [docs/connectors.md](docs/connectors.md) for the full guide.
 | `/api/v1/sources` | GET | List all available data sources |
 | `/api/v1/sources/{id}/status` | GET | Detailed status for a single source |
 
-## Built With PSE
+## Part of the Northflow Platform
 
-PSE is the data foundation for Northflow's domain-specific intelligence platforms:
+PSE is one of several engines in Northflow's planetary intelligence infrastructure. Each engine serves a different function:
 
-- **[FLUX](https://flux.northflow.no)** — Renewable energy siting and yield prediction for developing countries
-- **[CERES](https://ceres.northflow.no)** — Humanitarian crisis and famine early warning
-- **[MARVIS](https://marvis.northflow.no)** — Maritime domain intelligence
+| Engine | Function | Status |
+|--------|----------|--------|
+| **PSE** | Planetary Sensing Engine — ingests, fuses, and serves Earth observation data | Open source (this repo) |
+| **HGE** | Hypothesis Generation Engine — generates and ranks scientific hypotheses from data | Core platform |
+
+Domain adapters connect to whichever engines they need:
+
+- **FLUX** — Renewable energy siting and yield prediction · *built on PSE*
+- **CERES** — Humanitarian crisis and famine early warning · *built on HGE* · [arXiv:2603.09425](https://arxiv.org/abs/2603.09425)
+- **MARVIS** — Maritime domain intelligence · *built on HGE*
+- **ClimVal** — Climate model validation · [PyPI](https://pypi.org/project/climval/)
+
+As the platform matures, adapters will draw from multiple engines simultaneously — PSE for data, HGE for hypotheses.
 
 ## Testing
 

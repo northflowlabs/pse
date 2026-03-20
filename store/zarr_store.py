@@ -10,10 +10,10 @@ Supports both local filesystem and S3 backends via fsspec.
 """
 from __future__ import annotations
 
+import contextlib
 import logging
-from pathlib import Path
-from typing import Optional
 from datetime import date
+from pathlib import Path
 
 import fsspec
 import xarray as xr
@@ -57,7 +57,7 @@ class ZarrStore:
         self,
         ds: xr.Dataset,
         source_id: str,
-        reference_date: Optional[date] = None,
+        reference_date: date | None = None,
     ) -> str:
         """
         Persist *ds* to the store.
@@ -94,7 +94,7 @@ class ZarrStore:
         self,
         source_id: str,
         reference_date: date,
-    ) -> Optional[xr.Dataset]:
+    ) -> xr.Dataset | None:
         """
         Load a stored Dataset for *source_id* on *reference_date*.
 
@@ -112,7 +112,7 @@ class ZarrStore:
         source_id: str,
         start: date,
         end: date,
-    ) -> Optional[xr.Dataset]:
+    ) -> xr.Dataset | None:
         """
         Load and concatenate daily Zarr partitions from *start* to *end*
         (inclusive).  Missing days are silently skipped.
@@ -147,10 +147,8 @@ class ZarrStore:
         dates: list[date] = []
         for entry in entries:
             name = Path(entry).name
-            try:
+            with contextlib.suppress(ValueError):
                 dates.append(date.fromisoformat(name))
-            except ValueError:
-                pass
         return sorted(dates)
 
     def exists(self, source_id: str, reference_date: date) -> bool:

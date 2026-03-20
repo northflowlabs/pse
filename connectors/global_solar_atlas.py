@@ -22,8 +22,7 @@ API reference: https://globalsolaratlas.info/api
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 import httpx
 import numpy as np
@@ -106,7 +105,7 @@ class GlobalSolarAtlasConnector(BaseConnector):
         variables: list[str],
         spatial: SpatialBounds,
         temporal: TemporalBounds,
-        resolution: Optional[float] = None,
+        resolution: float | None = None,
     ) -> xr.Dataset:
         """
         Fetch long-term average solar data for a bounding box.
@@ -155,7 +154,7 @@ class GlobalSolarAtlasConnector(BaseConnector):
 
     async def get_latest_timestamp(self) -> datetime:
         # Climatological data — treat as always current
-        return datetime.now(timezone.utc)
+        return datetime.now(UTC)
 
     # ------------------------------------------------------------------
     # Private helpers

@@ -6,12 +6,10 @@ PSE query endpoints:
 """
 from __future__ import annotations
 
-import json
 from datetime import datetime
-from typing import Annotated, Literal, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from fastapi.responses import Response
 
 from pse.api.middleware.auth import verify_api_key
 from pse.api.middleware.rate_limit import rate_limit
@@ -91,7 +89,7 @@ async def gridded_query(
     lon_max: Annotated[float, Query(ge=-180, le=180)],
     time_start: Annotated[datetime, Query(description="Start of time range (ISO 8601 UTC)")],
     time_end: Annotated[datetime, Query(description="End of time range (ISO 8601 UTC)")],
-    resolution: Annotated[Optional[float], Query(gt=0, description="Target spatial resolution (metres)")] = None,
+    resolution: Annotated[float | None, Query(gt=0, description="Target spatial resolution (metres)")] = None,
     _key: str = Depends(verify_api_key),
     _rl: None = Depends(rate_limit),
 ):

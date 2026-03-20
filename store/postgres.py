@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import (
     Column,
@@ -174,9 +173,9 @@ class PSEDatabase:
         max_lon: float,
         time_start: datetime,
         time_end: datetime,
-        zarr_path: Optional[str] = None,
-        quality_score: Optional[float] = None,
-        provenance: Optional[dict] = None,
+        zarr_path: str | None = None,
+        quality_score: float | None = None,
+        provenance: dict | None = None,
     ) -> IngestRecord:
         record = IngestRecord(
             source_id=source_id,
@@ -201,7 +200,7 @@ class PSEDatabase:
         self,
         session: AsyncSession,
         source_id: str,
-    ) -> Optional[IngestRecord]:
+    ) -> IngestRecord | None:
         stmt = (
             select(IngestRecord)
             .where(IngestRecord.source_id == source_id)
@@ -220,10 +219,10 @@ class PSEDatabase:
         session: AsyncSession,
         source_id: str,
         *,
-        last_successful_fetch: Optional[datetime] = None,
-        last_error: Optional[str] = None,
-        latest_data_timestamp: Optional[datetime] = None,
-        quality_score: Optional[float] = None,
+        last_successful_fetch: datetime | None = None,
+        last_error: str | None = None,
+        latest_data_timestamp: datetime | None = None,
+        quality_score: float | None = None,
     ) -> None:
         stmt = text("""
             INSERT INTO pse_source_status
@@ -268,8 +267,8 @@ class PSEDatabase:
         lat: float,
         lon: float,
         observed_at: datetime,
-        unit: Optional[str] = None,
-        metadata: Optional[dict] = None,
+        unit: str | None = None,
+        metadata: dict | None = None,
     ) -> PointObservation:
         obs = PointObservation(
             source_id=source_id,

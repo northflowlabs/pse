@@ -15,7 +15,6 @@ import json
 import logging
 import time
 from dataclasses import dataclass
-from typing import Optional
 
 import xarray as xr
 
@@ -55,7 +54,7 @@ class PSECache:
     # Public API
     # ------------------------------------------------------------------
 
-    def get(self, key: str) -> Optional[xr.Dataset]:
+    def get(self, key: str) -> xr.Dataset | None:
         """Return cached dataset, or None if missing / expired."""
         entry = self._store.get(key)
         if entry is None:
@@ -72,7 +71,7 @@ class PSECache:
         self,
         key: str,
         dataset: xr.Dataset,
-        ttl: Optional[float] = None,
+        ttl: float | None = None,
     ) -> None:
         """Insert or replace a cache entry."""
         if len(self._store) >= self._max_entries and key not in self._store:
@@ -125,7 +124,7 @@ class PSECache:
         variables: list[str],
         spatial: SpatialBounds,
         temporal: TemporalBounds,
-        resolution: Optional[float] = None,
+        resolution: float | None = None,
     ) -> str:
         """
         Build a deterministic cache key from query parameters.

@@ -6,7 +6,7 @@ Run unit tests only: pytest -m "not integration"
 """
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, patch
 
 import numpy as np
@@ -142,11 +142,10 @@ class TestOpenMeteoUnit:
 
     @pytest.mark.asyncio
     async def test_get_latest_timestamp_is_recent(self, connector):
-        from datetime import timezone
         ts = await connector.get_latest_timestamp()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         # Should be within the last 2 hours
-        lag = (now - ts.replace(tzinfo=timezone.utc)).total_seconds()
+        lag = (now - ts.replace(tzinfo=UTC)).total_seconds()
         assert lag < 7200, f"latest_timestamp lag {lag}s is too large"
 
 

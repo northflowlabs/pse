@@ -22,11 +22,9 @@ import asyncio
 import logging
 import os
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
-import httpx
 import numpy as np
 import xarray as xr
 
@@ -103,8 +101,8 @@ class ERA5Connector(BaseConnector):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        api_url: Optional[str] = None,
+        api_key: str | None = None,
+        api_url: str | None = None,
     ):
         self._api_key = api_key or os.environ.get("ERA5_CDS_API_KEY", "")
         self._api_url = (api_url or os.environ.get("ERA5_CDS_API_URL", _DEFAULT_CDS_URL)).rstrip("/")
@@ -140,7 +138,7 @@ class ERA5Connector(BaseConnector):
         variables: list[str],
         spatial: SpatialBounds,
         temporal: TemporalBounds,
-        resolution: Optional[float] = None,
+        resolution: float | None = None,
     ) -> xr.Dataset:
         """
         Submit a CDS retrieval request and wait for the result.
@@ -181,7 +179,7 @@ class ERA5Connector(BaseConnector):
         temporal: TemporalBounds,
     ) -> DataQuality:
         latest = await self.get_latest_timestamp()
-        lag = (datetime.now(timezone.utc) - latest.replace(tzinfo=timezone.utc)).total_seconds()
+        lag = (datetime.now(UTC) - latest.replace(tzinfo=UTC)).total_seconds()
         return DataQuality(
             completeness=0.999,
             temporal_lag=lag,
@@ -199,7 +197,7 @@ class ERA5Connector(BaseConnector):
     async def get_latest_timestamp(self) -> datetime:
         """ERA5 near-real-time has ~5 day lag. Return approximate latest."""
         from datetime import timedelta
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         return (now - timedelta(days=5)).replace(hour=0, minute=0, second=0, microsecond=0)
 
     # ------------------------------------------------------------------
@@ -339,7 +337,7 @@ class ERA5Connector(BaseConnector):
         return xr.Dataset(data_vars)
 
     @staticmethod
-    def _find_var(ds: xr.Dataset, cds_name: str) -> Optional[xr.DataArray]:
+    def _find_var(ds: xr.Dataset, cds_name: str) -> xr.DataArray | None:
         """
         Find a variable in an xarray Dataset by CDS long name or common short name.
         CDS NetCDF files use short names (e.g. 't2m', 'u10') not the API long names.

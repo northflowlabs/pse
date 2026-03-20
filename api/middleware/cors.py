@@ -1,7 +1,6 @@
 """
 CORS configuration for the PSE API.
 """
-from starlette.middleware.cors import CORSMiddleware
 
 ALLOWED_ORIGINS = [
     "http://localhost:3000",   # local React dev server

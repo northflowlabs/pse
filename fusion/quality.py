@@ -91,7 +91,7 @@ def quality_weighted_merge(
             blended = np.zeros_like(stack[0], dtype=np.float32)
             total_weight = np.zeros_like(stack[0], dtype=np.float32)
 
-            for da_arr, w in zip(stack, source_weights):
+            for da_arr, w in zip(stack, source_weights, strict=False):
                 valid_mask = ~np.isnan(da_arr)
                 blended = np.where(valid_mask, blended + w * da_arr, blended)
                 total_weight = np.where(valid_mask, total_weight + w, total_weight)

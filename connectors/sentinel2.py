@@ -19,12 +19,10 @@ OData API:     https://catalogue.dataspace.copernicus.eu/odata/v1
 from __future__ import annotations
 
 import asyncio
-import base64
 import logging
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 import httpx
 import numpy as np
@@ -89,8 +87,8 @@ class Sentinel2Connector(BaseConnector):
 
     def __init__(
         self,
-        client_id: Optional[str] = None,
-        client_secret: Optional[str] = None,
+        client_id: str | None = None,
+        client_secret: str | None = None,
         max_cloud_cover: float = 30.0,
         max_concurrent_downloads: int = 2,
     ):
@@ -99,7 +97,7 @@ class Sentinel2Connector(BaseConnector):
         self._client_secret = client_secret or os.environ.get("COPERNICUS_DATASPACE_CLIENT_SECRET", "")
         self._max_cloud = max_cloud_cover
         self._sem = asyncio.Semaphore(max_concurrent_downloads)
-        self._token: Optional[str] = None
+        self._token: str | None = None
         self._token_expiry: float = 0.0
 
         if not (self._client_id and self._client_secret):
@@ -133,7 +131,7 @@ class Sentinel2Connector(BaseConnector):
         variables: list[str],
         spatial: SpatialBounds,
         temporal: TemporalBounds,
-        resolution: Optional[float] = None,
+        resolution: float | None = None,
     ) -> xr.Dataset:
         """
         Find and retrieve the best Sentinel-2 scenes for the request.
@@ -184,7 +182,7 @@ class Sentinel2Connector(BaseConnector):
             adj_completeness = 0.0
 
         latest = await self.get_latest_timestamp()
-        lag = (datetime.now(timezone.utc) - latest.replace(tzinfo=timezone.utc)).total_seconds()
+        lag = (datetime.now(UTC) - latest.replace(tzinfo=UTC)).total_seconds()
 
         return DataQuality(
             completeness=min(1.0, adj_completeness),
@@ -202,7 +200,7 @@ class Sentinel2Connector(BaseConnector):
     async def get_latest_timestamp(self) -> datetime:
         """Return latest scene timestamp from STAC or approximate now - 5 days."""
         from datetime import timedelta
-        return (datetime.now(timezone.utc) - timedelta(days=_REVISIT_DAYS)).replace(
+        return (datetime.now(UTC) - timedelta(days=_REVISIT_DAYS)).replace(
             hour=0, minute=0, second=0, microsecond=0
         )
 
@@ -350,7 +348,7 @@ class Sentinel2Connector(BaseConnector):
         self,
         href: str,
         spatial: SpatialBounds,
-    ) -> Optional[np.ndarray]:
+    ) -> np.ndarray | None:
         """
         Download a single band asset and clip to spatial bounds.
 

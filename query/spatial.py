@@ -3,8 +3,6 @@ PSE spatial query helpers — clipping, reprojection, bounding-box operations.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 import numpy as np
 import xarray as xr
 
@@ -26,7 +24,7 @@ def clip_to_bounds(ds: xr.Dataset, bounds: SpatialBounds) -> xr.Dataset:
 def regrid_to_resolution(
     ds: xr.Dataset,
     target_resolution_m: float,
-    bounds: Optional[SpatialBounds] = None,
+    bounds: SpatialBounds | None = None,
 ) -> xr.Dataset:
     """
     Resample a gridded Dataset to a target spatial resolution using linear

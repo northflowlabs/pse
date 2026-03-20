@@ -6,9 +6,8 @@ real CDS and are gated behind @pytest.mark.integration.
 """
 from __future__ import annotations
 
-import asyncio
-from datetime import datetime
-from unittest.mock import MagicMock, patch
+from datetime import UTC, datetime
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -28,7 +27,7 @@ def connector():
 
 def _make_mock_netcdf(variables: list[str], n_lat: int = 3, n_lon: int = 3, n_time: int = 48) -> bytes:
     """Build a synthetic NetCDF file in memory."""
-    import tempfile, os
+    import tempfile
     from pathlib import Path
 
     import pandas as pd
@@ -144,10 +143,10 @@ class TestERA5Unit:
 
     @pytest.mark.asyncio
     async def test_latest_timestamp_is_5_days_ago(self, connector):
-        from datetime import timezone, timedelta
+        from datetime import timedelta
         ts = await connector.get_latest_timestamp()
         expected_lag = timedelta(days=5).total_seconds()
-        actual_lag = (datetime.now(timezone.utc) - ts.replace(tzinfo=timezone.utc)).total_seconds()
+        actual_lag = (datetime.now(UTC) - ts.replace(tzinfo=UTC)).total_seconds()
         assert abs(actual_lag - expected_lag) < 86_400, "ERA5 lag should be ~5 days"
 
 

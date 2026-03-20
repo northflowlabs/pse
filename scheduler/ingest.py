@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import structlog
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -20,7 +20,6 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pse.config.settings import settings
 from pse.connectors.base import SpatialBounds, TemporalBounds
 from pse.connectors.era5 import ERA5Connector
-from pse.connectors.global_solar_atlas import GlobalSolarAtlasConnector
 from pse.connectors.open_meteo import OpenMeteoConnector
 from pse.connectors.osm import OSMConnector
 from pse.connectors.world_bank import WorldBankConnector
@@ -51,7 +50,7 @@ DEFAULT_VARIABLES_OPEN_METEO = [
 async def ingest_open_meteo(db: PSEDatabase, zarr: ZarrStore) -> None:
     """Ingest yesterday's Open-Meteo data for the default region."""
     connector = OpenMeteoConnector()
-    yesterday = datetime.now(timezone.utc).date() - timedelta(days=1)
+    yesterday = datetime.now(UTC).date() - timedelta(days=1)
     temporal = TemporalBounds(
         start=datetime(yesterday.year, yesterday.month, yesterday.day),
         end=datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59),
@@ -86,7 +85,7 @@ async def ingest_open_meteo(db: PSEDatabase, zarr: ZarrStore) -> None:
             await db.update_source_status(
                 session,
                 "open_meteo",
-                last_successful_fetch=datetime.now(timezone.utc),
+                last_successful_fetch=datetime.now(UTC),
                 latest_data_timestamp=temporal.end,
                 quality_score=quality.overall_score,
             )
@@ -109,7 +108,7 @@ async def ingest_era5(db: PSEDatabase, zarr: ZarrStore) -> None:
 
     connector = ERA5Connector()
     from datetime import timedelta
-    target_date = (datetime.now(timezone.utc) - timedelta(days=6)).date()
+    target_date = (datetime.now(UTC) - timedelta(days=6)).date()
     temporal = TemporalBounds(
         start=datetime(target_date.year, target_date.month, target_date.day),
         end=datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59),
@@ -144,7 +143,7 @@ async def ingest_era5(db: PSEDatabase, zarr: ZarrStore) -> None:
             )
             await db.update_source_status(
                 session, "era5",
-                last_successful_fetch=datetime.now(timezone.utc),
+                last_successful_fetch=datetime.now(UTC),
                 latest_data_timestamp=temporal.end,
                 quality_score=quality.overall_score,
             )
@@ -158,11 +157,10 @@ async def ingest_era5(db: PSEDatabase, zarr: ZarrStore) -> None:
 
 async def ingest_osm_static(db: PSEDatabase, zarr: ZarrStore) -> None:
     """Refresh OSM infrastructure data for the default region (weekly)."""
-    from datetime import timedelta
     connector = OSMConnector()
     temporal = TemporalBounds(
-        start=datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0),
-        end=datetime.now(timezone.utc),
+        start=datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0),
+        end=datetime.now(UTC),
     )
     osm_vars = ["power_line_density", "substation_count", "nearest_substation_lat",
                 "nearest_substation_lon", "road_density", "settlement_count"]
@@ -170,7 +168,7 @@ async def ingest_osm_static(db: PSEDatabase, zarr: ZarrStore) -> None:
     log.info("Ingesting OSM infrastructure")
     try:
         ds = await connector.fetch(variables=osm_vars, spatial=DEFAULT_REGION, temporal=temporal)
-        today = datetime.now(timezone.utc).date()
+        today = datetime.now(UTC).date()
         zarr_path = zarr.write(ds, source_id="osm", reference_date=today)
         quality = await connector.get_quality(DEFAULT_REGION, temporal)
 
@@ -187,7 +185,7 @@ async def ingest_osm_static(db: PSEDatabase, zarr: ZarrStore) -> None:
             )
             await db.update_source_status(
                 session, "osm",
-                last_successful_fetch=datetime.now(timezone.utc),
+                last_successful_fetch=datetime.now(UTC),
                 quality_score=quality.overall_score,
             )
         log.info("OSM ingest complete")
@@ -199,11 +197,10 @@ async def ingest_osm_static(db: PSEDatabase, zarr: ZarrStore) -> None:
 
 async def ingest_world_bank(db: PSEDatabase, zarr: ZarrStore) -> None:
     """Refresh World Bank indicators (monthly)."""
-    from datetime import timedelta
     connector = WorldBankConnector()
     temporal = TemporalBounds(
         start=datetime(2015, 1, 1),
-        end=datetime(datetime.now(timezone.utc).year - 1, 12, 31),
+        end=datetime(datetime.now(UTC).year - 1, 12, 31),
     )
     wb_vars = ["electricity_access_pct", "rural_electricity_access",
                "gdp_per_capita_usd", "population_total", "renewable_energy_pct"]
@@ -211,7 +208,7 @@ async def ingest_world_bank(db: PSEDatabase, zarr: ZarrStore) -> None:
     log.info("Ingesting World Bank indicators")
     try:
         ds = await connector.fetch(variables=wb_vars, spatial=DEFAULT_REGION, temporal=temporal)
-        today = datetime.now(timezone.utc).date()
+        today = datetime.now(UTC).date()
         zarr_path = zarr.write(ds, source_id="world_bank", reference_date=today)
         quality = await connector.get_quality(DEFAULT_REGION, temporal)
 
@@ -228,7 +225,7 @@ async def ingest_world_bank(db: PSEDatabase, zarr: ZarrStore) -> None:
             )
             await db.update_source_status(
                 session, "world_bank",
-                last_successful_fetch=datetime.now(timezone.utc),
+                last_successful_fetch=datetime.now(UTC),
                 quality_score=quality.overall_score,
             )
         log.info("World Bank ingest complete")

@@ -15,13 +15,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Optional
 
 import xarray as xr
 
 from pse.connectors.base import BaseConnector, SpatialBounds, TemporalBounds
-from pse.query.spatial import clip_to_bounds, point_query, regrid_to_resolution
-from pse.query.temporal import clip_to_bounds as temporal_clip
+from pse.query.spatial import point_query
 from pse.store.cache import PSECache
 
 log = logging.getLogger(__name__)
@@ -54,7 +52,7 @@ class QueryEngine:
     def __init__(
         self,
         connectors: dict[str, BaseConnector],
-        cache: Optional[PSECache] = None,
+        cache: PSECache | None = None,
     ):
         self._connectors = connectors
         self._cache = cache or PSECache()
@@ -74,7 +72,7 @@ class QueryEngine:
         variables: list[str],
         spatial: SpatialBounds,
         temporal: TemporalBounds,
-        resolution_m: Optional[float] = None,
+        resolution_m: float | None = None,
     ) -> xr.Dataset:
         """
         Retrieve data for the requested variables, region, and time range.
@@ -182,7 +180,7 @@ class QueryEngine:
         variables: list[str],
         spatial: SpatialBounds,
         temporal: TemporalBounds,
-        resolution: Optional[float],
+        resolution: float | None,
     ) -> xr.Dataset:
         key = PSECache.build_key(
             connector.source_id, variables, spatial, temporal, resolution

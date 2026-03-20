@@ -11,8 +11,7 @@ Archive:  https://open-meteo.com/en/docs/historical-weather-api
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 import httpx
 import numpy as np
@@ -116,7 +115,7 @@ class OpenMeteoConnector(BaseConnector):
         variables: list[str],
         spatial: SpatialBounds,
         temporal: TemporalBounds,
-        resolution: Optional[float] = None,
+        resolution: float | None = None,
     ) -> xr.Dataset:
         """
         Fetch hourly data for a bounding box by querying a grid of points in
@@ -152,7 +151,7 @@ class OpenMeteoConnector(BaseConnector):
         temporal: TemporalBounds,
     ) -> DataQuality:
         latest = await self.get_latest_timestamp()
-        lag = (datetime.now(timezone.utc) - latest).total_seconds()
+        lag = (datetime.now(UTC) - latest).total_seconds()
         return DataQuality(
             completeness=0.99,  # Open-Meteo ERA5-Land has essentially global coverage
             temporal_lag=lag,
@@ -171,7 +170,7 @@ class OpenMeteoConnector(BaseConnector):
         Open-Meteo forecast data is updated hourly.
         We approximate the latest available time as (now - 1 hour), UTC.
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         return now.replace(minute=0, second=0, microsecond=0)
 
     # ------------------------------------------------------------------

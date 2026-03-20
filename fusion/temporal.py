@@ -52,9 +52,8 @@ def classify_time_axis(ds: xr.Dataset) -> Literal["hourly", "daily", "monthly_cl
         return "none"
 
     # Check for integer month index (GSA climatology)
-    if time_vals.dtype in (np.int32, np.int64):
-        if set(time_vals.tolist()).issubset(set(range(1, 13))):
-            return "monthly_clim"
+    if time_vals.dtype in (np.int32, np.int64) and set(time_vals.tolist()).issubset(set(range(1, 13))):
+        return "monthly_clim"
 
     try:
         times = pd.to_datetime(time_vals)
@@ -102,7 +101,7 @@ def align_to_common_axis(
         ds for ds in datasets
         if classify_time_axis(ds) in ("hourly", "daily", "snapshot")
         and "time" in ds.dims
-        and not ds.time.values.dtype in (np.int32, np.int64)
+        and ds.time.values.dtype not in (np.int32, np.int64)
     ]
 
     if real_time_datasets:

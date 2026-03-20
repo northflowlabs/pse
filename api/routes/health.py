@@ -4,7 +4,7 @@ GET /api/v1/health — system health and connector freshness.
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, Depends, Request
@@ -40,7 +40,7 @@ async def health(
     async def _check_connector(src_id, connector):
         try:
             ts = await asyncio.wait_for(connector.get_latest_timestamp(), timeout=5.0)
-            lag = (datetime.now(timezone.utc) - ts.replace(tzinfo=timezone.utc)).total_seconds()
+            lag = (datetime.now(UTC) - ts.replace(tzinfo=UTC)).total_seconds()
             return src_id, {
                 "status": "ok",
                 "latest_data_timestamp": ts.isoformat(),
@@ -70,7 +70,7 @@ async def health(
 
     return {
         "status": overall,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "database": {"status": "ok" if db_ok else "error"},
         "connectors": connector_statuses,
         "cache": cache_stats,

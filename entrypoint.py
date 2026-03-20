@@ -37,7 +37,7 @@ def _normalise_database_url() -> None:
     url = os.environ.get("DATABASE_URL", "")
     if url.startswith("postgresql://") and "+asyncpg" not in url:
         os.environ["DATABASE_URL"] = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-        print(f"[entrypoint] DATABASE_URL normalised to asyncpg driver", flush=True)
+        print("[entrypoint] DATABASE_URL normalised to asyncpg driver", flush=True)
 
 
 if __name__ == "__main__":

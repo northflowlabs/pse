@@ -19,9 +19,9 @@ API docs: https://datahelpdesk.worldbank.org/knowledgebase/articles/889392
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 import httpx
 import numpy as np
@@ -115,7 +115,7 @@ class WorldBankConnector(BaseConnector):
         variables: list[str],
         spatial: SpatialBounds,
         temporal: TemporalBounds,
-        resolution: Optional[float] = None,
+        resolution: float | None = None,
     ) -> xr.Dataset:
         """
         Fetch World Bank indicators for countries overlapping the spatial bounds.
@@ -154,7 +154,7 @@ class WorldBankConnector(BaseConnector):
         n_time, n_lat, n_lon = len(times), len(lats), len(lons)
 
         data_vars = {}
-        for var, result in zip(variables, results):
+        for var, result in zip(variables, results, strict=False):
             if isinstance(result, Exception):
                 log.warning("[world_bank] %s fetch failed: %s", var, result)
                 arr = np.full((n_time, n_lat, n_lon), np.nan, dtype=np.float32)
@@ -186,7 +186,7 @@ class WorldBankConnector(BaseConnector):
         temporal: TemporalBounds,
     ) -> DataQuality:
         latest = await self.get_latest_timestamp()
-        lag = (datetime.now(timezone.utc) - latest).total_seconds()
+        lag = (datetime.now(UTC) - latest).total_seconds()
         return DataQuality(
             completeness=0.85,
             temporal_lag=lag,
@@ -202,9 +202,8 @@ class WorldBankConnector(BaseConnector):
 
     async def get_latest_timestamp(self) -> datetime:
         """World Bank typically lags 1-2 years behind present."""
-        from datetime import timedelta
-        latest_year = datetime.now(timezone.utc).year - 1
-        return datetime(latest_year, 1, 1, tzinfo=timezone.utc)
+        latest_year = datetime.now(UTC).year - 1
+        return datetime(latest_year, 1, 1, tzinfo=UTC)
 
     # ------------------------------------------------------------------
     # Private: API fetch
@@ -216,7 +215,7 @@ class WorldBankConnector(BaseConnector):
         countries: list[str],
         year_start: int,
         year_end: int,
-    ) -> dict[str, dict[int, Optional[float]]]:
+    ) -> dict[str, dict[int, float | None]]:
         """
         Fetch a single indicator for a list of countries.
 
@@ -242,7 +241,7 @@ class WorldBankConnector(BaseConnector):
             raise ConnectorError(f"[world_bank] Unexpected response format for {indicator}")
 
         data_points = payload[1] or []
-        result: dict[str, dict[int, Optional[float]]] = {c: {} for c in countries}
+        result: dict[str, dict[int, float | None]] = {c: {} for c in countries}
 
         for dp in data_points:
             country_iso3 = dp.get("countryiso3code", "").upper()
@@ -251,10 +250,8 @@ class WorldBankConnector(BaseConnector):
             year = dp.get("date")
             value = dp.get("value")
             if year:
-                try:
+                with contextlib.suppress(ValueError, TypeError):
                     result[country_iso3][int(year)] = float(value) if value is not None else None
-                except (ValueError, TypeError):
-                    pass
 
         return result
 
@@ -272,7 +269,7 @@ class WorldBankConnector(BaseConnector):
         return matches
 
     def _country_grid(
-        self, countries: list[str], resolution: Optional[float]
+        self, countries: list[str], resolution: float | None
     ) -> tuple[list[float], list[float]]:
         """Build a 2-3 point grid for each country in the list."""
         if not countries:
@@ -289,7 +286,7 @@ class WorldBankConnector(BaseConnector):
 
     def _broadcast_to_grid(
         self,
-        country_data: dict[str, dict[int, Optional[float]]],
+        country_data: dict[str, dict[int, float | None]],
         years: list[int],
         countries: list[str],
         lats: list[float],

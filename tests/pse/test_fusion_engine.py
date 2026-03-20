@@ -3,7 +3,7 @@ Tests for the PSE FusionEngine and fusion sub-modules.
 """
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
@@ -13,8 +13,8 @@ import xarray as xr
 from pse.connectors.base import DataQuality, SpatialBounds, TemporalBounds
 from pse.fusion.engine import FusionEngine
 from pse.fusion.grid import make_regular_grid, regrid_dataset
-from pse.fusion.quality import compute_weights, quality_weighted_merge, detect_conflicts
-from pse.fusion.temporal import classify_time_axis, align_to_common_axis
+from pse.fusion.quality import compute_weights, detect_conflicts, quality_weighted_merge
+from pse.fusion.temporal import align_to_common_axis, classify_time_axis
 from pse.query.engine import QueryEngine
 from pse.store.cache import PSECache
 
@@ -53,8 +53,7 @@ def _make_connector(source_id, variables):
             return DataQuality(0.95, 0.0, 11000, 0.90)
 
         async def get_latest_timestamp(self):
-            from datetime import timezone
-            return datetime.now(timezone.utc)
+            return datetime.now(UTC)
 
     return MockConnector()
 

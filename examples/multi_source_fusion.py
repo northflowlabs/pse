@@ -18,8 +18,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from pse.connectors.base import SpatialBounds, TemporalBounds
-from pse.connectors.open_meteo import OpenMeteoConnector
 from pse.connectors.global_solar_atlas import GlobalSolarAtlasConnector
+from pse.connectors.open_meteo import OpenMeteoConnector
 from pse.fusion.engine import FusionEngine
 
 
