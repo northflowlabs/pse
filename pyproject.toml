@@ -69,7 +69,7 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://northflow.no"
+Homepage = "https://pse.northflow.no"
 Documentation = "https://github.com/northflowlabs/pse/tree/main/docs"
 Repository = "https://github.com/northflowlabs/pse"
 Issues = "https://github.com/northflowlabs/pse/issues"
