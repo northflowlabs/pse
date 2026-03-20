@@ -200,18 +200,8 @@ pytest --cov=pse --cov-report=html
 
 ## Citation
 
-If you use PSE in academic work, please cite:
-
-```bibtex
-@software{northflow_pse_2026,
-  author    = {Pedersen, Tom Danny},
-  title     = {{Northflow PSE}: Planetary Sensing Engine},
-  year      = {2026},
-  publisher = {GitHub},
-  url       = {https://github.com/northflowlabs/pse},
-  license   = {Apache-2.0}
-}
-```
+Pedersen, Tom Danny S. (2026). Northflow PSE: Planetary Sensing Engine.
+GitHub. https://github.com/northflowlabs/pse
 
 ## Contributing
 

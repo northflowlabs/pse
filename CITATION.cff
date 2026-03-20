@@ -9,7 +9,7 @@ repository-code: "https://github.com/northflowlabs/pse"
 license: Apache-2.0
 authors:
   - family-names: Pedersen
-    given-names: Tom Danny
+    given-names: Tom Danny S.
     email: tdp@northflow.no
     affiliation: "Northflow Technologies AS"
 keywords:
