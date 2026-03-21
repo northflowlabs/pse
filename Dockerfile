@@ -13,7 +13,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Copy source into /app/pse/ so `import pse` resolves correctly
+COPY . ./pse/
 
 ENV PYTHONPATH=/app
 ENV PYTHONDONTWRITEBYTECODE=1
