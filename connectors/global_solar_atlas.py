@@ -26,6 +26,7 @@ from datetime import UTC, datetime
 
 import httpx
 import numpy as np
+import pandas as pd
 import xarray as xr
 
 from .base import (
@@ -125,7 +126,7 @@ class GlobalSolarAtlasConnector(BaseConnector):
         ]
         point_results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        ds = self._assemble_grid(point_results, lats, lons, variables)
+        ds = self._assemble_grid(point_results, lats, lons, variables, temporal.start.year)
         ds.attrs.update(self._base_attrs(variables, spatial, temporal))
         return ds
 
@@ -221,6 +222,7 @@ class GlobalSolarAtlasConnector(BaseConnector):
         lats: list[float],
         lons: list[float],
         pse_variables: list[str],
+        year: int = 2020,
     ) -> xr.Dataset:
         """
         Assemble per-point results into (time=12 months × lat × lon) Dataset.
@@ -263,8 +265,8 @@ class GlobalSolarAtlasConnector(BaseConnector):
                     if a_val is not None:
                         annual[pse_v][i_lat, i_lon] = float(a_val)
 
-        # Use integer month index (1–12) as the time coordinate
-        months = list(range(1, 13))
+        # Real datetime64 timestamps: first day of each month in the query year
+        months = pd.date_range(f"{year}-01-01", periods=12, freq="MS")
 
         data_vars = {
             pse_v: (["time", "latitude", "longitude"], arrays[pse_v])
@@ -280,7 +282,7 @@ class GlobalSolarAtlasConnector(BaseConnector):
             },
         )
         ds["time"].attrs["long_name"] = "month_of_year"
-        ds["time"].attrs["units"] = "month"
+        ds["time"].attrs["climatology"] = "GSA 1994–2018 long-term average"
 
         # Attach annual totals as a secondary set of data variables
         for pse_v in pse_variables:

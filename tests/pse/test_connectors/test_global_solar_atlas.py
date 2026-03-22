@@ -79,6 +79,27 @@ class TestGlobalSolarAtlasUnit:
         assert "solar_dni" in ds.data_vars
 
     @pytest.mark.asyncio
+    async def test_time_coordinate_is_datetime64(self, connector):
+        """Time axis must be real datetime64 values, not integer month indices."""
+        import numpy as np
+        mock_json = _make_mock_gsa_response(-8.5, 115.2)
+
+        with patch.object(connector, "_fetch_point", new=AsyncMock(return_value=mock_json)):
+            ds = await connector.fetch(
+                variables=["solar_ghi"],
+                spatial=BALI,
+                temporal=YEAR_2025,
+            )
+
+        time = ds.coords["time"]
+        assert np.issubdtype(time.dtype, np.datetime64), (
+            f"Expected datetime64 time coordinate, got {time.dtype}"
+        )
+        # First step must be 2025-01-01, last must be 2025-12-01
+        assert str(time.values[0])[:10] == "2025-01-01"
+        assert str(time.values[-1])[:10] == "2025-12-01"
+
+    @pytest.mark.asyncio
     async def test_fetch_annual_variable_present(self, connector):
         mock_json = _make_mock_gsa_response(-8.5, 115.2)
 
