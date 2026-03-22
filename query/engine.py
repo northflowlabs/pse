@@ -187,10 +187,7 @@ class QueryEngine:
                 )
 
         # Merge all per-connector datasets
-        if len(datasets) == 1:
-            merged = datasets[0]
-        else:
-            merged = xr.merge(datasets, join="outer")
+        merged = datasets[0] if len(datasets) == 1 else xr.merge(datasets, join="outer")
 
         # Attach connector provenance metadata
         merged.attrs["pse_connector_results"] = {
