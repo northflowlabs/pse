@@ -164,6 +164,10 @@ def _dataset_to_response(ds, **extra_meta) -> dict:
     for dim in ["time", "latitude", "longitude"]:
         if dim in ds.coords:
             raw = ds.coords[dim].values
+            # Normalise scalar (0-d) coords to 1-element arrays so iteration
+            # is always safe regardless of how a connector stored the coord.
+            if raw.ndim == 0:
+                raw = raw.reshape(1)
             if dim == "time":
                 coords[dim] = [
                     pd.Timestamp(t).isoformat() for t in raw
