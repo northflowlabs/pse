@@ -43,11 +43,10 @@ from .base import (
 _VAR_MAP: dict[str, str] = {
     "solar_ghi":    "GHI",
     "solar_dni":    "DNI",
-    "solar_gti":    "GTI",
+    "solar_gti":    "GTI_opta",
     "solar_dif":    "DIF",
-    "solar_pvout":  "PVOUT",
+    "solar_pvout":  "PVOUT_csi",
     "temperature_2m": "TEMP",
-    "wind_speed_10m": "WS",
 }
 
 _NATIVE_RESOLUTION_M = 1_000   # ~1 km
@@ -192,9 +191,7 @@ class GlobalSolarAtlasConnector(BaseConnector):
         }
         """
         params = {
-            "lat": lat,
-            "lon": lon,
-            "outputformat": "json",
+            "loc": f"{lat},{lon}",
         }
         async with self._sem:
             try:
@@ -251,17 +248,17 @@ class GlobalSolarAtlasConnector(BaseConnector):
                 if isinstance(result, Exception):
                     continue
 
-                monthly = result.get("monthly", {})
-                ann = result.get("annual", {})
+                monthly_data = result.get("monthly", {}).get("data", {})
+                annual_data = result.get("annual", {}).get("data", {})
 
                 for pse_v in pse_variables:
                     gsa_v = _VAR_MAP[pse_v]
-                    m_vals = monthly.get(gsa_v)
+                    m_vals = monthly_data.get(gsa_v)
                     if m_vals and len(m_vals) == 12:
                         arrays[pse_v][:, i_lat, i_lon] = np.array(
                             m_vals, dtype=np.float32
                         )
-                    a_val = ann.get(gsa_v)
+                    a_val = annual_data.get(gsa_v)
                     if a_val is not None:
                         annual[pse_v][i_lat, i_lon] = float(a_val)
 

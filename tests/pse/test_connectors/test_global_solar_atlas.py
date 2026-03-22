@@ -23,23 +23,29 @@ def connector():
 
 
 def _make_mock_gsa_response(lat: float, lon: float) -> dict:
-    """Simulate a GSA API JSON response."""
+    """Simulate a GSA API JSON response (v1.6 nested structure)."""
     monthly_ghi = [110, 120, 150, 160, 175, 165, 155, 160, 150, 140, 115, 105]
     annual_ghi = sum(monthly_ghi)
     return {
         "annual": {
-            "GHI": annual_ghi,
-            "DNI": 1543.1,
-            "GTI": 1620.0,
-            "DIF": 430.2,
-            "PVOUT": 1540.0,
-            "TEMP": 26.5,
-            "WS": 3.2,
+            "metadata": {},
+            "data": {
+                "GHI": annual_ghi,
+                "DNI": 1543.1,
+                "GTI_opta": 1620.0,
+                "DIF": 430.2,
+                "PVOUT_csi": 1540.0,
+                "TEMP": 26.5,
+            },
         },
         "monthly": {
-            "GHI": monthly_ghi,
-            "DNI": [100, 110, 140, 150, 165, 155, 145, 150, 140, 130, 105, 95],
-            "GTI": [115, 125, 158, 170, 183, 173, 163, 168, 158, 148, 120, 110],
+            "metadata": {},
+            "data": {
+                "GHI": monthly_ghi,
+                "DNI": [100, 110, 140, 150, 165, 155, 145, 150, 140, 130, 105, 95],
+                "GTI_opta": [115, 125, 158, 170, 183, 173, 163, 168, 158, 148, 120, 110],
+                "TEMP": [25.0, 25.2, 25.8, 26.1, 26.5, 26.3, 26.2, 26.6, 27.1, 27.1, 26.5, 25.9],
+            },
         },
     }
 
