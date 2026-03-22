@@ -77,8 +77,10 @@ class QueryEngine:
         """
         Retrieve data for the requested variables, region, and time range.
 
-        Variables are routed to the best available connector (first that
-        declares the variable).  Cache is checked before fetching.
+        Variables are routed to the primary capable connector first.  If a
+        connector fails, the engine falls back to the next available connector
+        for each affected variable, only raising if ALL connectors fail for a
+        given variable.
 
         Args:
             variables:    PSE canonical variable names.
@@ -88,20 +90,25 @@ class QueryEngine:
 
         Returns:
             Merged xarray.Dataset covering all requested variables.
+            ``ds.attrs["pse_connector_results"]`` contains per-variable
+            success/failure metadata.
 
         Raises:
             ValueError: If any variable has no registered connector.
+            RuntimeError: If all connectors fail for any variable.
         """
-        # Group variables by connector (pick the first capable one for now)
-        connector_map: dict[str, list[str]] = {}  # connector source_id → [vars]
-        missing = []
+        # Build per-variable candidate lists and primary-connector groups
+        var_candidates: dict[str, list[BaseConnector]] = {}
+        primary_groups: dict[str, list[str]] = {}  # source_id → [vars]
+        missing: list[str] = []
+
         for var in variables:
             candidates = self._var_index.get(var, [])
             if not candidates:
                 missing.append(var)
                 continue
-            chosen = candidates[0]  # TODO Sprint 2: use quality-weighted selection
-            connector_map.setdefault(chosen.source_id, []).append(var)
+            var_candidates[var] = candidates
+            primary_groups.setdefault(candidates[0].source_id, []).append(var)
 
         if missing:
             raise ValueError(
@@ -109,24 +116,88 @@ class QueryEngine:
                 f"Available variables: {sorted(self._var_index)}"
             )
 
-        # Fetch from each connector (cache-aware, in parallel)
-        fetch_tasks = [
-            self._fetch_with_cache(
-                connector=self._connectors[src_id],
-                variables=vars_,
-                spatial=spatial,
-                temporal=temporal,
-                resolution=resolution_m,
-            )
-            for src_id, vars_ in connector_map.items()
-        ]
-        datasets = await asyncio.gather(*fetch_tasks)
+        # Phase 1 — try each primary-connector group in parallel
+        async def _try_group(
+            src_id: str, vars_: list[str]
+        ) -> tuple[str, list[str], xr.Dataset | None, Exception | None]:
+            try:
+                ds = await self._fetch_with_cache(
+                    self._connectors[src_id], vars_, spatial, temporal, resolution_m
+                )
+                return src_id, vars_, ds, None
+            except Exception as exc:  # noqa: BLE001
+                return src_id, vars_, None, exc
 
-        # Merge all per-connector datasets into one
+        group_results = await asyncio.gather(
+            *[_try_group(sid, vrs) for sid, vrs in primary_groups.items()]
+        )
+
+        # Phase 2 — collect successes; queue failed variables for fallback
+        datasets: list[xr.Dataset] = []
+        connector_succeeded: dict[str, str] = {}        # var → source_id
+        connector_failed: dict[str, list[str]] = {}     # var → [source_ids]
+        needs_fallback: list[str] = []
+
+        for src_id, vars_, ds, err in group_results:
+            if err is None:
+                datasets.append(ds)
+                for v in vars_:
+                    connector_succeeded[v] = src_id
+            else:
+                log.warning(
+                    "Connector %s failed for %s — will try alternatives. Error: %s",
+                    src_id, vars_, err,
+                )
+                for v in vars_:
+                    connector_failed.setdefault(v, []).append(src_id)
+                    needs_fallback.append(v)
+
+        # Phase 3 — sequential per-variable fallback for failed groups
+        for var in needs_fallback:
+            already_tried = set(connector_failed.get(var, []))
+            alternatives = [
+                c for c in var_candidates[var]
+                if c.source_id not in already_tried
+            ]
+            succeeded = False
+            for connector in alternatives:
+                try:
+                    ds = await self._fetch_with_cache(
+                        connector, [var], spatial, temporal, resolution_m
+                    )
+                    datasets.append(ds)
+                    connector_succeeded[var] = connector.source_id
+                    log.info(
+                        "Variable '%s' succeeded with fallback connector %s",
+                        var, connector.source_id,
+                    )
+                    succeeded = True
+                    break
+                except Exception as exc:  # noqa: BLE001
+                    log.warning(
+                        "Fallback connector %s also failed for '%s': %s",
+                        connector.source_id, var, exc,
+                    )
+                    connector_failed.setdefault(var, []).append(connector.source_id)
+
+            if not succeeded:
+                raise RuntimeError(
+                    f"All connectors failed for variable '{var}'. "
+                    f"Tried: {connector_failed.get(var, [])}"
+                )
+
+        # Merge all per-connector datasets
         if len(datasets) == 1:
-            return datasets[0]
+            merged = datasets[0]
+        else:
+            merged = xr.merge(datasets, join="outer")
 
-        return xr.merge(datasets, join="outer")
+        # Attach connector provenance metadata
+        merged.attrs["pse_connector_results"] = {
+            "succeeded": connector_succeeded,
+            "failed": connector_failed,
+        }
+        return merged
 
     async def point_query(
         self,

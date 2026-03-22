@@ -126,3 +126,76 @@ class TestQueryEngine:
         assert "solar_ghi" in avail
         assert "source_a" in avail["temperature_2m"]
         assert "source_b" in avail["solar_ghi"]
+
+    @pytest.mark.asyncio
+    async def test_fallback_connector_used_when_primary_fails(self):
+        """If the primary connector raises, the engine falls back to the next."""
+        from pse.connectors.base import BaseConnector, DataQuality
+
+        class FailingConnector(BaseConnector):
+            @property
+            def source_id(self): return "primary_fail"
+            @property
+            def variables(self): return ["temperature_2m"]
+            @property
+            def update_frequency_seconds(self): return 3600
+            async def fetch(self, *a, **kw):
+                raise RuntimeError("simulated primary failure")
+            async def get_quality(self, *a, **kw):
+                return DataQuality(0.99, 0.0, 11000, 0.88)
+            async def get_latest_timestamp(self):
+                return datetime.now(UTC)
+
+        fallback = _make_mock_connector("fallback_ok", ["temperature_2m"])
+        engine = QueryEngine(
+            connectors={"primary_fail": FailingConnector(), "fallback_ok": fallback},
+            cache=PSECache(default_ttl=60.0),
+        )
+        ds = await engine.query(variables=["temperature_2m"], spatial=JAKARTA, temporal=WEEK)
+        assert "temperature_2m" in ds.data_vars
+        meta = ds.attrs["pse_connector_results"]
+        assert meta["succeeded"]["temperature_2m"] == "fallback_ok"
+        assert "primary_fail" in meta["failed"]["temperature_2m"]
+
+    @pytest.mark.asyncio
+    async def test_all_connectors_fail_raises(self):
+        """RuntimeError is raised when every connector fails for a variable."""
+        from pse.connectors.base import BaseConnector, DataQuality
+
+        class AlwaysFail(BaseConnector):
+            def __init__(self, sid):
+                self._sid = sid
+            @property
+            def source_id(self): return self._sid
+            @property
+            def variables(self): return ["temperature_2m"]
+            @property
+            def update_frequency_seconds(self): return 3600
+            async def fetch(self, *a, **kw):
+                raise RuntimeError(f"{self._sid} failed")
+            async def get_quality(self, *a, **kw):
+                return DataQuality(0.99, 0.0, 11000, 0.88)
+            async def get_latest_timestamp(self):
+                return datetime.now(UTC)
+
+        engine = QueryEngine(
+            connectors={"a": AlwaysFail("a"), "b": AlwaysFail("b")},
+            cache=PSECache(default_ttl=60.0),
+        )
+        with pytest.raises(RuntimeError, match="All connectors failed"):
+            await engine.query(variables=["temperature_2m"], spatial=JAKARTA, temporal=WEEK)
+
+    @pytest.mark.asyncio
+    async def test_connector_metadata_attached_to_dataset(self, engine):
+        """Successful queries include pse_connector_results in attrs."""
+        ds = await engine.query(
+            variables=["temperature_2m", "solar_ghi"],
+            spatial=JAKARTA,
+            temporal=WEEK,
+        )
+        meta = ds.attrs.get("pse_connector_results")
+        assert meta is not None
+        assert "succeeded" in meta
+        assert meta["succeeded"]["temperature_2m"] == "source_a"
+        assert meta["succeeded"]["solar_ghi"] == "source_b"
+        assert meta["failed"] == {}
