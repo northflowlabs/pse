@@ -62,13 +62,20 @@ _HOURLY_VARS = set(_VAR_MAP.keys())
 _NATIVE_RESOLUTION_M = 11_000
 _RELIABILITY = 0.88
 
-# Open-Meteo archive endpoint (ERA5-based historical)
+# Open-Meteo free endpoints (may be blocked on datacenter IPs)
 _ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
-# Live forecast (last 3 days + 16 days ahead)
 _FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
+
+# Open-Meteo commercial endpoints — used when OPEN_METEO_API_KEY is set.
+# Register at: https://open-meteo.com/en/pricing
+_COMMERCIAL_ARCHIVE_URL = "https://customer-archive-api.open-meteo.com/v1/archive"
+_COMMERCIAL_FORECAST_URL = "https://customer-api.open-meteo.com/v1/forecast"
 
 # Cutoff: data older than ~5 days goes through archive API
 _ARCHIVE_CUTOFF_DAYS = 5
+
+# Request timeout — kept short so failures don't stall the fallback system
+_REQUEST_TIMEOUT = 10.0
 
 
 class OpenMeteoConnector(BaseConnector):
@@ -82,12 +89,22 @@ class OpenMeteoConnector(BaseConnector):
 
     def __init__(
         self,
-        archive_url: str = _ARCHIVE_URL,
-        forecast_url: str = _FORECAST_URL,
+        archive_url: str | None = None,
+        forecast_url: str | None = None,
         max_concurrent: int = 10,
     ):
-        self._archive_url = archive_url
-        self._forecast_url = forecast_url
+        import os
+        api_key = os.environ.get("OPEN_METEO_API_KEY", "")
+        self._api_key = api_key
+
+        if api_key:
+            # Commercial endpoints — no IP-based restrictions
+            self._archive_url = archive_url or _COMMERCIAL_ARCHIVE_URL
+            self._forecast_url = forecast_url or _COMMERCIAL_FORECAST_URL
+        else:
+            self._archive_url = archive_url or _ARCHIVE_URL
+            self._forecast_url = forecast_url or _FORECAST_URL
+
         self._sem = asyncio.Semaphore(max_concurrent)
 
     # ------------------------------------------------------------------
@@ -228,7 +245,7 @@ class OpenMeteoConnector(BaseConnector):
     ) -> dict:
         """Fetch hourly timeseries for a single lat/lon point."""
         url = self._select_url(temporal)
-        params = {
+        params: dict = {
             "latitude": lat,
             "longitude": lon,
             "hourly": ",".join(om_vars),
@@ -236,10 +253,12 @@ class OpenMeteoConnector(BaseConnector):
             "end_date": temporal.end.strftime("%Y-%m-%d"),
             "timezone": "UTC",
         }
+        if self._api_key:
+            params["apikey"] = self._api_key
 
         async with self._sem:
             try:
-                async with httpx.AsyncClient(timeout=30.0) as client:
+                async with httpx.AsyncClient(timeout=_REQUEST_TIMEOUT) as client:
                     resp = await client.get(url, params=params)
                     resp.raise_for_status()
                     return resp.json()

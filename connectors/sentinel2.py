@@ -46,6 +46,15 @@ _NATIVE_RESOLUTION_M = 10
 _REVISIT_DAYS = 5
 _RELIABILITY = 0.95
 
+# CDSE STAC collection identifier (lowercase with dashes)
+_S2_COLLECTION = "sentinel-2-l2a"
+
+# Skip band download if Content-Length exceeds this (bytes) — prevents OOM
+_MAX_BAND_BYTES = 50 * 1024 * 1024  # 50 MB
+
+# Band download timeout — must stay well below Railway's 60s proxy timeout
+_DOWNLOAD_TIMEOUT = 25.0
+
 # Band numbers for common Sentinel-2 L2A products
 # B04 = Red (665 nm), B08 = NIR (842 nm), B03 = Green (559 nm), B11 = SWIR (1610 nm)
 _BAND_MAP = {
@@ -137,31 +146,37 @@ class Sentinel2Connector(BaseConnector):
         Find and retrieve the best Sentinel-2 scenes for the request.
 
         Returns a Dataset with one time step per scene found.
+        Raises ConnectorError on any failure — never raises anything else
+        so the query engine's fallback system can handle it cleanly.
         """
-        self._validate_variables(variables)
+        try:
+            self._validate_variables(variables)
 
-        # Search STAC for matching scenes
-        scenes = await self._search_stac(spatial, temporal)
+            scenes = await self._search_stac(spatial, temporal)
 
-        if not scenes:
-            raise ConnectorError(
-                f"[sentinel2] No scenes found for region={spatial.to_dict()}, "
-                f"time={temporal.to_dict()}, max_cloud={self._max_cloud}%"
-            )
+            if not scenes:
+                raise ConnectorError(
+                    f"[sentinel2] No scenes found for region={spatial.to_dict()}, "
+                    f"time={temporal.to_dict()}, max_cloud={self._max_cloud}%"
+                )
 
-        log.info("[sentinel2] Found %d scenes", len(scenes))
+            log.info("[sentinel2] Found %d scenes", len(scenes))
 
-        # Process scenes (up to 3 to keep download time reasonable)
-        tasks = [self._process_scene(scene, variables, spatial) for scene in scenes[:3]]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+            # Process one scene at a time to keep memory usage predictable
+            tasks = [self._process_scene(scene, variables, spatial) for scene in scenes[:1]]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        valid = [r for r in results if isinstance(r, xr.Dataset)]
-        if not valid:
-            raise ConnectorError("[sentinel2] All scene downloads/processing failed.")
+            valid = [r for r in results if isinstance(r, xr.Dataset)]
+            if not valid:
+                raise ConnectorError("[sentinel2] All scene downloads/processing failed.")
 
-        ds = xr.concat(valid, dim="time") if len(valid) > 1 else valid[0]
-        ds.attrs.update(self._base_attrs(variables, spatial, temporal))
-        return ds
+            ds = xr.concat(valid, dim="time") if len(valid) > 1 else valid[0]
+            ds.attrs.update(self._base_attrs(variables, spatial, temporal))
+            return ds
+        except ConnectorError:
+            raise
+        except Exception as exc:
+            raise ConnectorError(f"[sentinel2] Unexpected error: {exc}") from exc
 
     # ------------------------------------------------------------------
     # Quality + freshness
@@ -241,16 +256,14 @@ class Sentinel2Connector(BaseConnector):
         """Query CDSE STAC for Sentinel-2 L2A scenes."""
         bbox = [spatial.min_lon, spatial.min_lat, spatial.max_lon, spatial.max_lat]
         body = {
-            "collections": ["SENTINEL-2"],
+            "collections": [_S2_COLLECTION],
             "bbox": bbox,
             "datetime": f"{temporal.start.strftime('%Y-%m-%dT%H:%M:%SZ')}/"
                         f"{temporal.end.strftime('%Y-%m-%dT%H:%M:%SZ')}",
-            "query": {
-                "eo:cloud_cover": {"lte": self._max_cloud},
-                "s2:processing_level": {"eq": "L2A"},
-            },
+            "filter": {"op": "<=", "args": [{"property": "eo:cloud_cover"}, self._max_cloud]},
+            "filter-lang": "cql2-json",
             "sortby": [{"field": "eo:cloud_cover", "direction": "asc"}],
-            "limit": 20,
+            "limit": 10,
         }
 
         try:
@@ -361,13 +374,22 @@ class Sentinel2Connector(BaseConnector):
                 from rasterio.windows import from_bounds
 
                 token = await self._get_token()
-                # Construct signed URL with auth header
                 headers = {"Authorization": f"Bearer {token}"}
 
                 with tempfile.NamedTemporaryFile(suffix=".tif", delete=False) as tmp:
                     tmp_path = tmp.name
 
-                async with httpx.AsyncClient(timeout=120.0, headers=headers) as client:
+                async with httpx.AsyncClient(timeout=_DOWNLOAD_TIMEOUT, headers=headers) as client:
+                    # HEAD request first — skip files that are too large to be safe
+                    head = await client.head(href, follow_redirects=True)
+                    content_length = int(head.headers.get("content-length", 0))
+                    if content_length > _MAX_BAND_BYTES:
+                        log.warning(
+                            "[sentinel2] Skipping band at %s — too large (%d MB)",
+                            href, content_length // (1024 * 1024),
+                        )
+                        return None
+
                     resp = await client.get(href, follow_redirects=True)
                     resp.raise_for_status()
                     Path(tmp_path).write_bytes(resp.content)
@@ -380,10 +402,9 @@ class Sentinel2Connector(BaseConnector):
                             src.transform
                         )
                         data = src.read(1, window=window).astype(np.float32)
-                        # Sentinel-2 L2A reflectance is stored as int16 / 10000
                         if src.nodata is not None:
                             data[data == src.nodata] = np.nan
-                        if data.max() > 2.0:  # likely stored as int * 10000
+                        if data.max() > 2.0:  # stored as int * 10000
                             data = data / 10_000.0
                         return data
                 finally:
