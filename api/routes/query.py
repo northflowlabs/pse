@@ -173,7 +173,10 @@ def _dataset_to_response(ds, **extra_meta) -> dict:
                     pd.Timestamp(t).isoformat() for t in raw
                 ]
             else:
-                coords[dim] = raw.tolist()
+                # Return a scalar when there's only one element (point queries),
+                # a list when there are multiple (gridded queries).
+                lst = raw.tolist()
+                coords[dim] = lst[0] if len(lst) == 1 else lst
 
     variables = {}
     for var in ds.data_vars:
