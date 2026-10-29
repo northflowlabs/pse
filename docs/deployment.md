@@ -45,7 +45,7 @@ In the Railway dashboard:
 2. **Add a Volume**: Mount at `/data/zarr` for persistent Zarr storage
 3. **Set environment variables:**
    - `ERA5_CDS_API_KEY`: from Copernicus CDS
-   - `JWT_SECRET_KEY`: `openssl rand -hex 32`
+   - `PSE_API_KEYS`: one or more keys, comma-separated, each from `openssl rand -hex 32`
    - `ZARR_STORE_PATH`: `/data/zarr`
    - `ENVIRONMENT`: `production`
 4. **Set Root Directory** → `pse`
@@ -77,6 +77,6 @@ Railway provisions TLS automatically.
 | `ERA5_CDS_API_KEY` | No | none | Copernicus CDS API key |
 | `COPERNICUS_DATASPACE_CLIENT_ID` | No | none | Sentinel-2 CDSE client ID |
 | `COPERNICUS_DATASPACE_CLIENT_SECRET` | No | none | Sentinel-2 CDSE client secret |
-| `JWT_SECRET_KEY` | Yes (prod) | `change-me` | JWT signing secret |
+| `PSE_API_KEYS` | Yes (prod) | none | Comma-separated API keys accepted in the `X-API-Key` header. Outside development, no keys means every request is refused |
 | `ENVIRONMENT` | No | `development` | `development` or `production` |
 | `LOG_LEVEL` | No | `INFO` | Python log level |

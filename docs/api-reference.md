@@ -2,7 +2,7 @@
 
 Base URL: `https://pse.northflow.no/api/v1`
 
-All endpoints return JSON. Authentication uses the `X-API-Key: <key>` header. In development mode (`ENVIRONMENT=development`, the default) every request is accepted without a key.
+All endpoints return JSON. Requests carry the `X-API-Key: <key>` header; the hosted API at pse.northflow.no gives keys on request to hello@northflow.no. `/health` answers without a key. When you run PSE yourself in development mode (`ENVIRONMENT=development`, the default), every request is accepted without a key.
 
 ---
 
@@ -52,7 +52,7 @@ Timeseries of the requested variables at a single lat/lon point.
 
 **Example**
 ```bash
-curl "https://pse.northflow.no/api/v1/point?lat=-8.5&lon=115.2&variables=temperature_2m,solar_ghi&time_start=2025-01-01T00:00:00Z&time_end=2025-01-07T00:00:00Z"
+curl -H "X-API-Key: $PSE_API_KEY" "https://pse.northflow.no/api/v1/point?lat=-8.5&lon=115.2&variables=temperature_2m,solar_ghi&time_start=2025-01-01T00:00:00Z&time_end=2025-01-07T00:00:00Z"
 ```
 
 ---

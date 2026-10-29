@@ -7,9 +7,8 @@ import asyncio
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 
-from pse.api.middleware.auth import verify_api_key
 
 if TYPE_CHECKING:
     from pse.query.engine import QueryEngine
@@ -19,10 +18,7 @@ router = APIRouter()
 
 
 @router.get("/health")
-async def health(
-    request: Request,
-    _key: str = Depends(verify_api_key),
-):
+async def health(request: Request):
     """
     Return overall system health including:
     - Database reachability

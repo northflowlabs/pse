@@ -96,7 +96,7 @@ docker run -p 8001:8000 --env-file .env pse
 ### Query a point
 
 ```bash
-curl "http://localhost:8001/api/v1/point?lat=-8.5&lon=115.2&variables=temperature_2m,solar_ghi"
+curl "http://localhost:8001/api/v1/point?lat=-8.5&lon=115.2&variables=temperature_2m,solar_ghi&time_start=2025-01-01T00:00:00Z&time_end=2025-01-07T00:00:00Z"
 ```
 
 ## Data Sources

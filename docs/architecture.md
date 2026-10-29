@@ -7,7 +7,7 @@ PSE is structured as a layered service. Each layer has a single responsibility a
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        REST API                             │
-│         FastAPI  ·  JWT/API-key auth  ·  CORS               │
+│         FastAPI  ·  API-key auth  ·  CORS                   │
 │  /health  /point  /query  /fuse  /sources                   │
 ├─────────────────────────────────────────────────────────────┤
 │                     Query Engine                            │

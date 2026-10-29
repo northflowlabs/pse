@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- API keys are read from `PSE_API_KEYS` (comma-separated). The built-in fallback key is removed; outside development, a server without configured keys refuses every request.
+- `/health` answers without a key, so platform health checks work in production.
+
 ## [0.1.0] - 2026-03-21
 
 ### Added
