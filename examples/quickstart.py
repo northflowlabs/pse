@@ -39,7 +39,7 @@ async def main() -> None:
     print(f"\nMean temperature : {float(ds['temperature_2m'].mean()):.1f} °C")
     print(f"Mean solar GHI   : {float(ds['solar_ghi'].mean()):.1f} W/m²")
     print(f"Data source      : {ds.attrs.get('pse_source', 'open_meteo')}")
-    print(f"Time steps       : {ds.dims.get('time', '—')}")
+    print(f"Time steps       : {ds.dims.get('time', '?')}")
 
 
 if __name__ == "__main__":

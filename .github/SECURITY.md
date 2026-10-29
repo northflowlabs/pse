@@ -6,7 +6,7 @@ If you discover a security vulnerability in PSE, please report it responsibly.
 
 **Do not open a public issue.**
 
-Email: **security@northflow.no**
+Email: **hello@northflow.no**
 
 We will acknowledge your report within 48 hours and provide a detailed response within 7 days.
 
