@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, Request
 
-
 if TYPE_CHECKING:
     from pse.query.engine import QueryEngine
     from pse.store.postgres import PSEDatabase
