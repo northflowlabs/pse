@@ -1,8 +1,8 @@
 """
 PSE query endpoints:
 
-  GET  /api/v1/point   — timeseries at a single lat/lon
-  GET  /api/v1/query   — gridded query over a bounding box
+  GET  /api/v1/point: timeseries at a single lat/lon
+  GET  /api/v1/query: gridded query over a bounding box
 """
 from __future__ import annotations
 

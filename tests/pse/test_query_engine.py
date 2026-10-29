@@ -101,9 +101,9 @@ class TestQueryEngine:
 
         connector.fetch = counting_fetch
 
-        # First call — should fetch
+        # First call: should fetch
         await engine.query(variables=["temperature_2m"], spatial=JAKARTA, temporal=WEEK)
-        # Second identical call — should hit cache
+        # Second identical call: should hit cache
         await engine.query(variables=["temperature_2m"], spatial=JAKARTA, temporal=WEEK)
 
         assert fetch_count[0] == 1, "Second identical query should have hit cache"

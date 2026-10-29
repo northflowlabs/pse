@@ -48,9 +48,9 @@ log = structlog.get_logger(__name__)
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="PSE — Planetary Sensing Engine",
+        title="PSE (Planetary Sensing Engine)",
         description=(
-            "Northflow Technologies AS — unified spatiotemporal data API. "
+            "Northflow Technologies AS: unified spatiotemporal data API. "
             "Ingests, normalises, and fuses satellite, weather, and sensor data."
         ),
         version="0.2.0",
@@ -74,7 +74,7 @@ def create_app() -> FastAPI:
         await db.init()
         app.state.db = db
 
-        # Connectors — all Sprint 2 sources registered here.
+        # Connectors: all Sprint 2 sources registered here.
         # Connectors without credentials log a warning and are still registered;
         # they will return ConnectorError on fetch if the key is missing.
         connectors = {
@@ -118,7 +118,7 @@ def create_app() -> FastAPI:
     @app.get("/", include_in_schema=False)
     async def root():
         return {
-            "service": "PSE — Planetary Sensing Engine",
+            "service": "PSE (Planetary Sensing Engine)",
             "version": "0.1.0",
             "docs": "/docs",
             "health": "/api/v1/health",

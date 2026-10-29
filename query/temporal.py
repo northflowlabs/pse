@@ -1,5 +1,5 @@
 """
-PSE temporal query helpers — slicing, alignment, and aggregation.
+PSE temporal query helpers: slicing, alignment, and aggregation.
 """
 from __future__ import annotations
 

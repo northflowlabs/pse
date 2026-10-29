@@ -1,6 +1,6 @@
 # Data Sources
 
-## ERA5 — ECMWF Reanalysis
+## ERA5: ECMWF Reanalysis
 
 **Source:** [Copernicus Climate Data Store](https://cds.climate.copernicus.eu/)
 **Connector:** `pse.connectors.era5.ERA5Connector`
@@ -14,7 +14,7 @@ Register at: https://cds.climate.copernicus.eu/
 
 ---
 
-## Open-Meteo — Free Weather API
+## Open-Meteo: Free Weather API
 
 **Source:** [Open-Meteo](https://open-meteo.com/)
 **Connector:** `pse.connectors.open_meteo.OpenMeteoConnector`
@@ -26,7 +26,7 @@ PSE variables: `temperature_2m`, `wind_speed_10m`, `solar_ghi`, `relative_humidi
 
 ---
 
-## Global Solar Atlas — Long-Term Solar Climatology
+## Global Solar Atlas: Long-Term Solar Climatology
 
 **Source:** [World Bank / Solargis](https://globalsolaratlas.info/)
 **Connector:** `pse.connectors.global_solar_atlas.GlobalSolarAtlasConnector`
@@ -38,19 +38,19 @@ PSE variables: `solar_ghi`, `solar_dni`, `solar_dhi`
 
 ---
 
-## Sentinel-2 — Copernicus Optical Imagery
+## Sentinel-2: Copernicus Optical Imagery
 
 **Source:** [Copernicus Data Space Ecosystem](https://dataspace.copernicus.eu/)
 **Connector:** `pse.connectors.sentinel2.Sentinel2Connector`
 **Key required:** Yes (free registration)
 
-Sentinel-2 is a twin-satellite ESA mission providing high-resolution (10–60 m) multispectral imagery with a 5-day global revisit cycle. PSE uses it for land-use classification, vegetation monitoring (NDVI), and water body detection (NDWI).
+Sentinel-2 is a twin-satellite ESA mission providing high-resolution (10 to 60 m) multispectral imagery with a 5-day global revisit cycle. PSE uses it for land-use classification, vegetation monitoring (NDVI), and water body detection (NDWI).
 
 PSE variables: `ndvi`, `ndwi`, `land_use`
 
 ---
 
-## OpenStreetMap — Infrastructure Data
+## OpenStreetMap: Infrastructure Data
 
 **Source:** [OpenStreetMap Overpass API](https://overpass-api.de/)
 **Connector:** `pse.connectors.osm.OSMConnector`
@@ -62,7 +62,7 @@ PSE variables: `nearest_substation_km`, `grid_capacity_mw`, `road_access_km`
 
 ---
 
-## World Bank — Socioeconomic Indicators
+## World Bank: Socioeconomic Indicators
 
 **Source:** [World Bank Open Data](https://data.worldbank.org/)
 **Connector:** `pse.connectors.world_bank.WorldBankConnector`

@@ -1,5 +1,5 @@
 """
-Northflow PSE — Multi-Source Fusion Example
+Northflow PSE: Multi-Source Fusion Example
 
 Fetches solar irradiance from Open-Meteo and Global Solar Atlas, then
 uses PSE's quality-weighted FusionEngine to merge them into a single

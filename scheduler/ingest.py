@@ -29,7 +29,7 @@ from pse.store.zarr_store import ZarrStore
 logging.basicConfig(level=settings.log_level.upper())
 log = structlog.get_logger(__name__)
 
-# Default ingest region — adjust or make configurable per deployment.
+# Default ingest region: adjust or make configurable per deployment.
 # Covers Indonesia (Phase 1 FLUX focus).
 DEFAULT_REGION = SpatialBounds(
     min_lat=-11.0, max_lat=6.0,
@@ -103,7 +103,7 @@ async def ingest_open_meteo(db: PSEDatabase, zarr: ZarrStore) -> None:
 async def ingest_era5(db: PSEDatabase, zarr: ZarrStore) -> None:
     """Ingest ERA5 data for the last completed day (5-day lag)."""
     if not settings.era5_cds_api_key:
-        log.info("ERA5 ingest skipped — ERA5_CDS_API_KEY not configured")
+        log.info("ERA5 ingest skipped: ERA5_CDS_API_KEY not configured")
         return
 
     connector = ERA5Connector()

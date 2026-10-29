@@ -31,9 +31,9 @@ PSE is structured as a layered service. Each layer has a single responsibility a
 
 Each data source connector implements `BaseConnector`:
 
-- **`fetch(variables, spatial, temporal)`** — returns an `xr.Dataset` in PSE variable naming, CF-convention coordinates
-- **`get_quality(spatial, temporal)`** — returns `DataQuality(reliability, recency_hours)`
-- **`get_latest_timestamp()`** — informs the scheduler when new data is available
+- **`fetch(variables, spatial, temporal)`**: returns an `xr.Dataset` in PSE variable naming, CF-convention coordinates
+- **`get_quality(spatial, temporal)`**: returns `DataQuality(reliability, recency_hours)`
+- **`get_latest_timestamp()`**: informs the scheduler when new data is available
 
 Connectors are stateless and independently testable. Network calls are async and run in the FastAPI event loop.
 
@@ -41,10 +41,10 @@ Connectors are stateless and independently testable. Network calls are async and
 
 When multiple connectors provide the same variable over the same domain, the `FusionEngine`:
 
-1. **Spatial alignment** — resamples all datasets onto a common grid
-2. **Temporal alignment** — reindexes to a common time axis
-3. **Quality weighting** — weights each source's contribution by `quality.reliability / quality.recency_hours`
-4. **Conflict detection** — flags sources that disagree by more than a configurable threshold
+1. **Spatial alignment**: resamples all datasets onto a common grid
+2. **Temporal alignment**: reindexes to a common time axis
+3. **Quality weighting**: weights each source's contribution by `quality.reliability / quality.recency_hours`
+4. **Conflict detection**: flags sources that disagree by more than a configurable threshold
 
 The output is a single `xr.Dataset` with `pse_sources` and `pse_quality_weights` attributes.
 
@@ -60,15 +60,15 @@ Array data is persisted in Zarr format, partitioned by `(source, variable, date)
 ### PostgreSQL / PostGIS
 
 Relational metadata is stored in PostgreSQL with PostGIS for spatial indexing:
-- `ingest_records` — log of every connector fetch
-- `point_observations` — individual sensor observations
-- `data_source_status` — per-connector health and freshness metrics
+- `ingest_records`: log of every connector fetch
+- `point_observations`: individual sensor observations
+- `data_source_status`: per-connector health and freshness metrics
 
 ### Cache
 
 A two-tier SHA-256 keyed cache sits in front of both stores:
-- **L1** — in-process LRU cache (configurable max entries)
-- **L2** — TTL-based invalidation (default 1 hour for forecast data, 24 hours for reanalysis)
+- **L1**: in-process LRU cache (configurable max entries)
+- **L2**: TTL-based invalidation (default 1 hour for forecast data, 24 hours for reanalysis)
 
 ## Scheduler
 

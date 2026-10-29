@@ -24,9 +24,9 @@ def compute_weights(
     Compute normalised quality weights from a list of quality scores.
 
     Args:
-        quality_scores:  Overall quality score (0–1) for each source.
+        quality_scores:  Overall quality score (0 to 1) for each source.
         prefer_recent:   If True, blend recency_scores into weights.
-        recency_scores:  Recency score (0–1, higher = more recent) per source.
+        recency_scores:  Recency score (0 to 1, higher = more recent) per source.
 
     Returns:
         Numpy array of weights that sum to 1.
@@ -80,7 +80,7 @@ def quality_weighted_merge(
     merged_vars: dict[str, xr.DataArray] = {}
     for var, sources in all_vars.items():
         if len(sources) == 1:
-            # Only one source — pass through
+            # Only one source: pass through
             merged_vars[var] = sources[0][1]
         else:
             # Quality-weighted blend

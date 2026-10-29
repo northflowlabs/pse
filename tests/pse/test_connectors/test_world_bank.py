@@ -55,7 +55,7 @@ class TestWorldBankUnit:
         assert "IDN" in countries
 
     def test_find_countries_no_match_returns_empty(self, connector):
-        # Antarctic bbox — no countries defined
+        # Antarctic bbox: no countries defined
         bounds = SpatialBounds(-90.0, -80.0, 0.0, 10.0)
         countries = connector._find_countries(bounds)
         assert len(countries) == 0

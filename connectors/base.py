@@ -1,5 +1,5 @@
 """
-PSE Base Connector — abstract interface all data source connectors must implement.
+PSE Base Connector: abstract interface all data source connectors must implement.
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -67,10 +67,10 @@ class TemporalBounds:
 @dataclass
 class DataQuality:
     """Quality metadata for a connector's data over a specific region/period."""
-    completeness: float          # 0–1, fraction of non-null values
+    completeness: float          # 0 to 1, fraction of non-null values
     temporal_lag: float          # seconds since last update
     spatial_resolution: float    # native resolution in metres
-    source_reliability: float    # 0–1, historical reliability score
+    source_reliability: float    # 0 to 1, historical reliability score
     provenance: dict = field(default_factory=dict)  # full provenance metadata
 
     def __post_init__(self):
@@ -83,7 +83,7 @@ class DataQuality:
 
     @property
     def overall_score(self) -> float:
-        """Simple composite quality score 0–1."""
+        """Simple composite quality score 0 to 1."""
         recency_score = max(0.0, 1.0 - self.temporal_lag / (7 * 86400))  # decays over a week
         return (self.completeness * 0.4 + self.source_reliability * 0.4 + recency_score * 0.2)
 
@@ -160,11 +160,11 @@ class BaseConnector(ABC):
               - Coordinates: latitude, longitude, time
               - Data variables: as requested (units in CF conventions)
               - Attributes:
-                  pse_source      — self.source_id
-                  pse_fetched_at  — UTC ISO timestamp of this fetch
-                  pse_variables   — list of variables returned
-                  pse_spatial     — bounding box dict
-                  pse_temporal    — time range dict
+                  pse_source: self.source_id
+                  pse_fetched_at: UTC ISO timestamp of this fetch
+                  pse_variables: list of variables returned
+                  pse_spatial: bounding box dict
+                  pse_temporal: time range dict
 
         Raises:
             ConnectorError: on any fetch failure.

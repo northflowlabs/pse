@@ -1,5 +1,5 @@
 """
-Northflow PSE — Quick Start Example
+Northflow PSE: Quick Start Example
 
 Query temperature and solar irradiance for a location in Bali, Indonesia.
 No API keys required (uses Open-Meteo and Global Solar Atlas).

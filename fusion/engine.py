@@ -1,5 +1,5 @@
 """
-PSE Fusion Engine — multi-source spatiotemporal data fusion.
+PSE Fusion Engine: multi-source spatiotemporal data fusion.
 
 The FusionEngine is the heart of PSE.  When a query spans multiple connectors
 it:
@@ -12,7 +12,7 @@ it:
   5. Resolves conflicts using quality-weighted blending.
   6. Returns a single unified xarray.Dataset with full provenance.
 
-The FusionEngine wraps the QueryEngine — it adds the alignment and merge
+The FusionEngine wraps the QueryEngine: it adds the alignment and merge
 steps on top of the QueryEngine's per-source fetch logic.
 """
 from __future__ import annotations

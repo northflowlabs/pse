@@ -118,7 +118,7 @@ def align_to_common_axis(
         cls = classify_time_axis(ds)
 
         if cls == "none":
-            # No time dim — broadcast a single time step
+            # No time dim: broadcast a single time step
             aligned.append(ds)
             continue
 

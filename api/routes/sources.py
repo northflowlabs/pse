@@ -1,5 +1,5 @@
 """
-GET /api/v1/sources — list available data sources and their metadata.
+GET /api/v1/sources: list available data sources and their metadata.
 """
 from __future__ import annotations
 

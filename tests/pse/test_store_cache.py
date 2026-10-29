@@ -49,7 +49,7 @@ class TestPSECache:
         cache.put("k2", _dummy_ds(2.0))
         # Access k1 to make k2 the LRU
         cache.get("k1")
-        # Add k3 — should evict k2
+        # Add k3: should evict k2
         cache.put("k3", _dummy_ds(3.0))
         assert cache.get("k2") is None  # evicted
         assert cache.get("k1") is not None

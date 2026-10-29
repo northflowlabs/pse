@@ -10,7 +10,7 @@ readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11"
 authors = [
-    {name = "Tom Danny Pedersen", email = "tdp@northflow.no"},
+    {name = "Tom Danny S. Pedersen", email = "tdp@northflow.no"},
     {name = "Northflow Technologies AS"},
 ]
 keywords = [

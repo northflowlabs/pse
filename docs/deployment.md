@@ -17,9 +17,9 @@ curl http://localhost:8001/api/v1/health
 ```
 
 The stack includes:
-- `pse-api` — FastAPI service on port 8001
-- `postgres` — PostgreSQL 16 + PostGIS 3.4 on port 5432
-- `scheduler` — Background ingest daemon (optional, `--profile scheduler`)
+- `pse-api`: FastAPI service on port 8001
+- `postgres`: PostgreSQL 16 + PostGIS 3.4 on port 5432
+- `scheduler`: Background ingest daemon (optional, `--profile scheduler`)
 
 ---
 
@@ -41,13 +41,13 @@ railway init
 ```
 
 In the Railway dashboard:
-1. **Add a PostgreSQL plugin** — Railway injects `DATABASE_URL` automatically
-2. **Add a Volume** — Mount at `/data/zarr` for persistent Zarr storage
+1. **Add a PostgreSQL plugin**: Railway injects `DATABASE_URL` automatically
+2. **Add a Volume**: Mount at `/data/zarr` for persistent Zarr storage
 3. **Set environment variables:**
-   - `ERA5_CDS_API_KEY` — from Copernicus CDS
-   - `JWT_SECRET_KEY` — `openssl rand -hex 32`
-   - `ZARR_STORE_PATH` — `/data/zarr`
-   - `ENVIRONMENT` — `production`
+   - `ERA5_CDS_API_KEY`: from Copernicus CDS
+   - `JWT_SECRET_KEY`: `openssl rand -hex 32`
+   - `ZARR_STORE_PATH`: `/data/zarr`
+   - `ENVIRONMENT`: `production`
 4. **Set Root Directory** → `pse`
 
 ```bash
@@ -71,12 +71,12 @@ Railway provisions TLS automatically.
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `DATABASE_URL` | Yes | — | PostgreSQL connection string |
+| `DATABASE_URL` | Yes | none | PostgreSQL connection string |
 | `ZARR_STORE_PATH` | Yes | `/data/zarr` | Local path for Zarr storage |
-| `ZARR_STORE_URL` | No | — | S3/GCS URL (overrides path) |
-| `ERA5_CDS_API_KEY` | No | — | Copernicus CDS API key |
-| `COPERNICUS_DATASPACE_CLIENT_ID` | No | — | Sentinel-2 CDSE client ID |
-| `COPERNICUS_DATASPACE_CLIENT_SECRET` | No | — | Sentinel-2 CDSE client secret |
+| `ZARR_STORE_URL` | No | none | S3/GCS URL (overrides path) |
+| `ERA5_CDS_API_KEY` | No | none | Copernicus CDS API key |
+| `COPERNICUS_DATASPACE_CLIENT_ID` | No | none | Sentinel-2 CDSE client ID |
+| `COPERNICUS_DATASPACE_CLIENT_SECRET` | No | none | Sentinel-2 CDSE client secret |
 | `JWT_SECRET_KEY` | Yes (prod) | `change-me` | JWT signing secret |
 | `ENVIRONMENT` | No | `development` | `development` or `production` |
 | `LOG_LEVEL` | No | `INFO` | Python log level |

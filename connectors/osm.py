@@ -1,5 +1,5 @@
 """
-OpenStreetMap connector — Overpass API.
+OpenStreetMap connector: Overpass API.
 
 Queries OSM for infrastructure features relevant to energy siting:
   - power_lines     : High-voltage transmission lines
@@ -97,7 +97,7 @@ class OSMConnector(BaseConnector):
         Fetch OSM infrastructure features for the bounding box.
 
         The temporal argument is accepted for interface compatibility but
-        ignored — OSM data is current-state only.
+        ignored: OSM data is current-state only.
         """
         self._validate_variables(variables)
 

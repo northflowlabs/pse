@@ -10,13 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Core `BaseConnector` abstract class with spatial/temporal bounds, quality metadata, and update-frequency contract
-- 6 production data source connectors:
-  - **ERA5** — ECMWF reanalysis via CDS API (temperature, wind u/v components, solar radiation, precipitation, surface pressure)
-  - **Open-Meteo** — Free hourly weather forecast and historical data
-  - **Global Solar Atlas** — Long-term GHI/DNI/DIF climatology at ~1 km resolution
-  - **Sentinel-2** — CDSE-based optical imagery with NDVI, NDWI, and land-use classification
-  - **OpenStreetMap** — Overpass API for power infrastructure, roads, and settlements
-  - **World Bank** — Country-level socioeconomic indicators (electrification rate, GDP/capita, RE share)
+- 6 data source connectors:
+  - **ERA5**: ECMWF reanalysis via CDS API (temperature, wind u/v components, solar radiation, precipitation, surface pressure)
+  - **Open-Meteo**: Free hourly weather forecast and historical data
+  - **Global Solar Atlas**: Long-term GHI/DNI/DIF climatology at ~1 km resolution
+  - **Sentinel-2**: CDSE-based optical imagery with NDVI, NDWI, and land-use classification
+  - **OpenStreetMap**: Overpass API for power infrastructure, roads, and settlements
+  - **World Bank**: Country-level socioeconomic indicators (electrification rate, GDP/capita, RE share)
 - Quality-weighted fusion engine (`FusionEngine`) with:
   - Spatial regridding and temporal alignment
   - Quality-weighted merge across overlapping sources
@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PostgreSQL/PostGIS store for point observations, ingest records, and data source status
 - SHA-256 keyed TTL+LRU cache layer
 - FastAPI REST API with health, point query, bounding-box query, fusion, and source status endpoints
-- JWT + API-key authentication middleware
+- API-key authentication middleware (`X-API-Key`; development mode accepts every request)
 - APScheduler-based data ingestion scheduler with configurable intervals
 - `entrypoint.py` for Railway/cloud deployment (DATABASE_URL normalisation + PostGIS init)
 - Docker Compose deployment stack (PSE API + PostgreSQL/PostGIS + scheduler)

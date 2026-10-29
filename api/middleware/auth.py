@@ -17,7 +17,7 @@ _API_KEY_HEADER = APIKeyHeader(name="X-API-Key", auto_error=False)
 # In dev, any key (or no key) is accepted.
 _DEV_MODE = os.getenv("ENVIRONMENT", "development") == "development"
 
-# Hardcoded dev key — override with a real key store in production.
+# Hardcoded dev key: override with a real key store in production.
 _DEV_KEY = "pse-dev-key-northflow"
 
 

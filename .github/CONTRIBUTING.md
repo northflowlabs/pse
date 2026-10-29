@@ -35,9 +35,9 @@ This is the highest-impact contribution you can make. See [../docs/connectors.md
 
 Use the issue templates:
 
-- **Bug Report** — Something is broken
-- **Feature Request** — Suggest an enhancement
-- **New Connector** — Propose a new data source
+- **Bug Report**: Something is broken
+- **Feature Request**: Suggest an enhancement
+- **New Connector**: Propose a new data source
 
 ## Code of Conduct
 

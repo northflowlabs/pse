@@ -1,5 +1,5 @@
 """
-World Bank connector — World Bank Open Data API.
+World Bank connector: World Bank Open Data API.
 
 Provides country-level socioeconomic and energy access indicators:
   - electricity_access_pct    : Population with access to electricity (%)

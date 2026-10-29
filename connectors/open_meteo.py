@@ -1,5 +1,5 @@
 """
-Open-Meteo connector — free weather API, no key required.
+Open-Meteo connector: free weather API, no key required.
 
 Provides historical reanalysis (ERA5-Land via archive API) and short-range
 forecasts.  Ideal for development/testing and as a low-latency fallback for
@@ -27,7 +27,7 @@ from .base import (
 )
 
 # ---------------------------------------------------------------------------
-# Variable mapping  —  PSE canonical name  →  Open-Meteo parameter name
+# Variable mapping: PSE canonical name  →  Open-Meteo parameter name
 # ---------------------------------------------------------------------------
 _VAR_MAP: dict[str, str] = {
     "temperature_2m":            "temperature_2m",
@@ -66,7 +66,7 @@ _RELIABILITY = 0.88
 _ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
 _FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
 
-# Open-Meteo commercial endpoints — used when OPEN_METEO_API_KEY is set.
+# Open-Meteo commercial endpoints: used when OPEN_METEO_API_KEY is set.
 # Register at: https://open-meteo.com/en/pricing
 _COMMERCIAL_ARCHIVE_URL = "https://customer-archive-api.open-meteo.com/v1/archive"
 _COMMERCIAL_FORECAST_URL = "https://customer-api.open-meteo.com/v1/forecast"
@@ -74,7 +74,7 @@ _COMMERCIAL_FORECAST_URL = "https://customer-api.open-meteo.com/v1/forecast"
 # Cutoff: data older than ~5 days goes through archive API
 _ARCHIVE_CUTOFF_DAYS = 5
 
-# Request timeout — kept short so failures don't stall the fallback system
+# Request timeout: kept short so failures don't stall the fallback system
 _REQUEST_TIMEOUT = 10.0
 
 
@@ -98,7 +98,7 @@ class OpenMeteoConnector(BaseConnector):
         self._api_key = api_key
 
         if api_key:
-            # Commercial endpoints — no IP-based restrictions
+            # Commercial endpoints: no IP-based restrictions
             self._archive_url = archive_url or _COMMERCIAL_ARCHIVE_URL
             self._forecast_url = forecast_url or _COMMERCIAL_FORECAST_URL
         else:

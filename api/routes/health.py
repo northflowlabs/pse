@@ -1,5 +1,5 @@
 """
-GET /api/v1/health — system health and connector freshness.
+GET /api/v1/health: system health and connector freshness.
 """
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ async def health(
     # Database ping
     db_ok = await db.ping()
 
-    # Connector freshness — fetch latest timestamps in parallel
+    # Connector freshness: fetch latest timestamps in parallel
     connector_statuses = {}
     async def _check_connector(src_id, connector):
         try:

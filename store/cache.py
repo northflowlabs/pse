@@ -1,5 +1,5 @@
 """
-PSE in-memory cache layer — TTL-aware caching for connector fetch results.
+PSE in-memory cache layer: TTL-aware caching for connector fetch results.
 
 Sits between the query engine and connectors to avoid redundant API calls.
 Cache keys encode: source_id + variables + spatial bounds + temporal bounds +
@@ -34,7 +34,7 @@ class PSECache:
     """
     Simple in-process TTL cache for xarray.Dataset objects.
 
-    Not thread-safe in the traditional sense — but since the PSE API runs
+    Not thread-safe in the traditional sense, but since the PSE API runs
     in a single asyncio event loop, concurrent coroutines won't race on dict
     mutations (GIL + cooperative scheduling).
     """

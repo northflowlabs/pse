@@ -142,7 +142,7 @@ class TestGlobalSolarAtlasUnit:
 
     @pytest.mark.asyncio
     async def test_ghi_values_reasonable_for_tropics(self, connector):
-        """Bali monthly GHI should be in range 100–200 kWh/m²/month."""
+        """Bali monthly GHI should be in range 100 to 200 kWh/m²/month."""
         mock_json = _make_mock_gsa_response(-8.5, 115.2)
 
         with patch.object(connector, "_fetch_point", new=AsyncMock(return_value=mock_json)):

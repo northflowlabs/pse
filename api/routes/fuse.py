@@ -1,5 +1,5 @@
 """
-POST /api/v1/fuse — multi-source quality-weighted fused query.
+POST /api/v1/fuse: multi-source quality-weighted fused query.
 
 Unlike /api/v1/query (which fetches from a single connector per variable),
 /fuse explicitly invokes the FusionEngine to fetch from ALL capable sources

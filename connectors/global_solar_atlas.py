@@ -3,16 +3,16 @@ Global Solar Atlas (GSA) connector.
 
 GSA (https://globalsolaratlas.info) provides high-resolution long-term average
 solar resource data.  The public REST API returns annual/monthly climatological
-values rather than time-series — ideal for yield estimation and siting.
+values rather than time-series: ideal for yield estimation and siting.
 
 Key variables:
-  - GHI  — Global Horizontal Irradiance  (kWh/m²/year or kWh/m²/day)
-  - DNI  — Direct Normal Irradiance
-  - GTI  — Global Tilted Irradiance (optimum tilt)
-  - DIF  — Diffuse Horizontal Irradiance
-  - TEMP — Air temperature at 2 m
-  - WS   — Wind speed at 10 m
-  - PVOUT — Theoretical PV output (kWh/kWp/year)
+  - GHI: Global Horizontal Irradiance  (kWh/m²/year or kWh/m²/day)
+  - DNI: Direct Normal Irradiance
+  - GTI: Global Tilted Irradiance (optimum tilt)
+  - DIF: Diffuse Horizontal Irradiance
+  - TEMP: Air temperature at 2 m
+  - WS: Wind speed at 10 m
+  - PVOUT: Theoretical PV output (kWh/kWp/year)
 
 The API is publicly accessible without authentication for data query.
 Bulk download requires a GSA account; point/area queries are free.
@@ -38,7 +38,7 @@ from .base import (
 )
 
 # ---------------------------------------------------------------------------
-# Variable mapping  —  PSE canonical name → GSA parameter name
+# Variable mapping: PSE canonical name → GSA parameter name
 # ---------------------------------------------------------------------------
 _VAR_MAP: dict[str, str] = {
     "solar_ghi":    "GHI",
@@ -52,7 +52,7 @@ _VAR_MAP: dict[str, str] = {
 _NATIVE_RESOLUTION_M = 1_000   # ~1 km
 _RELIABILITY = 0.92
 
-# GSA data endpoint — returns JSON with monthly + annual statistics
+# GSA data endpoint: returns JSON with monthly + annual statistics
 _API_URL = "https://api.globalsolaratlas.info/data/lta"
 
 
@@ -62,7 +62,7 @@ class GlobalSolarAtlasConnector(BaseConnector):
 
     Because GSA provides *climatological* averages (not hourly time-series),
     the returned Dataset uses a synthetic time dimension representing months
-    (index 0–11 for Jan–Dec) or a single annual aggregate, depending on how
+    (index 0 to 11 for Jan to Dec) or a single annual aggregate, depending on how
     the data is requested.
 
     When a TemporalBounds is provided:
@@ -138,7 +138,7 @@ class GlobalSolarAtlasConnector(BaseConnector):
         spatial: SpatialBounds,
         temporal: TemporalBounds,
     ) -> DataQuality:
-        # GSA is a static climatological dataset — effectively always "fresh"
+        # GSA is a static climatological dataset: effectively always "fresh"
         return DataQuality(
             completeness=0.95,  # minor gaps over open ocean / polar regions
             temporal_lag=0.0,
@@ -146,14 +146,14 @@ class GlobalSolarAtlasConnector(BaseConnector):
             source_reliability=_RELIABILITY,
             provenance={
                 "source": self.source_id,
-                "dataset": "Global Solar Atlas 2.0 — long-term average",
+                "dataset": "Global Solar Atlas 2.0: long-term average",
                 "api_url": self._api_url,
-                "temporal_coverage": "1994–2018 (22-year climatology)",
+                "temporal_coverage": "1994 to 2018 (22-year climatology)",
             },
         )
 
     async def get_latest_timestamp(self) -> datetime:
-        # Climatological data — treat as always current
+        # Climatological data: treat as always current
         return datetime.now(UTC)
 
     # ------------------------------------------------------------------
@@ -224,7 +224,7 @@ class GlobalSolarAtlasConnector(BaseConnector):
         """
         Assemble per-point results into (time=12 months × lat × lon) Dataset.
 
-        Monthly values are used as the time dimension (index 0–11 = Jan–Dec).
+        Monthly values are used as the time dimension (index 0 to 11 = Jan to Dec).
         Annual totals are stored as Dataset-level attributes.
         """
         n_lat = len(lats)
@@ -279,7 +279,7 @@ class GlobalSolarAtlasConnector(BaseConnector):
             },
         )
         ds["time"].attrs["long_name"] = "month_of_year"
-        ds["time"].attrs["climatology"] = "GSA 1994–2018 long-term average"
+        ds["time"].attrs["climatology"] = "GSA 1994 to 2018 long-term average"
 
         # Attach annual totals as a secondary set of data variables
         for pse_v in pse_variables:

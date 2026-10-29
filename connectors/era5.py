@@ -1,8 +1,8 @@
 """
-ERA5 Reanalysis connector — Copernicus Climate Data Store (CDS).
+ERA5 Reanalysis connector: Copernicus Climate Data Store (CDS).
 
-ERA5 is ECMWF's state-of-the-art global reanalysis at ~31 km / 1-hour resolution,
-covering 1940–present.  It is the gold standard for historical climate data and the
+ERA5 is ECMWF's fifth-generation global reanalysis at ~31 km / 1-hour resolution,
+covering 1940 to present.  It is a widely used reference for historical climate data and the
 highest-reliability source in the PSE connector registry.
 
 CDS API workflow:
@@ -39,7 +39,7 @@ from pse.connectors.base import (
 log = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Variable mapping  —  PSE canonical  →  CDS / ERA5 short name
+# Variable mapping: PSE canonical  →  CDS / ERA5 short name
 # ---------------------------------------------------------------------------
 _VAR_MAP: dict[str, str] = {
     "temperature_2m":           "2m_temperature",
@@ -109,7 +109,7 @@ class ERA5Connector(BaseConnector):
 
         if not self._api_key:
             log.warning(
-                "[era5] ERA5_CDS_API_KEY not set — ERA5 fetches will fail. "
+                "[era5] ERA5_CDS_API_KEY not set: ERA5 fetches will fail. "
                 "Register at https://cds.climate.copernicus.eu/ to obtain a key."
             )
 

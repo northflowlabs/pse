@@ -9,7 +9,7 @@ build/
 *.egg
 .eggs/
 
-# Environment / secrets — never commit
+# Environment / secrets: never commit
 .env
 .env.local
 .env.*.local
@@ -28,7 +28,7 @@ env/
 .DS_Store
 Thumbs.db
 
-# Data — never commit raw geospatial data
+# Data: never commit raw geospatial data
 *.nc
 *.zarr/
 *.grib

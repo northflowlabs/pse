@@ -119,7 +119,7 @@ class TestOpenMeteoUnit:
 
     @pytest.mark.asyncio
     async def test_fetch_temperature_range_realistic(self, connector):
-        """Jakarta temperatures should be 20–40°C."""
+        """Jakarta temperatures should be 20 to 40°C."""
         mock_json = _make_mock_response(-6.2, 106.8)
 
         with patch.object(connector, "_fetch_point", new=AsyncMock(return_value=mock_json)):
@@ -150,7 +150,7 @@ class TestOpenMeteoUnit:
 
 
 # ---------------------------------------------------------------------------
-# Integration tests (real network — skipped in CI unless flag is set)
+# Integration tests (real network, skipped in CI unless flag is set)
 # ---------------------------------------------------------------------------
 
 class TestOpenMeteoIntegration:
@@ -172,7 +172,7 @@ class TestOpenMeteoIntegration:
         assert ds["temperature_2m"].dims == ("time", "latitude", "longitude")
 
         mean_temp = float(ds["temperature_2m"].mean())
-        assert 20 < mean_temp < 40, f"Mean temperature {mean_temp:.1f}°C — not tropical?"
+        assert 20 < mean_temp < 40, f"Mean temperature {mean_temp:.1f}°C, not tropical?"
 
     @pytest.mark.asyncio
     @pytest.mark.integration

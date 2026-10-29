@@ -28,12 +28,12 @@ async def _init_postgis() -> None:
         await conn.close()
         print("[entrypoint] PostGIS ready", flush=True)
     except Exception as exc:  # noqa: BLE001
-        # Log but don't abort — PostGIS may already be enabled by the provider
+        # Log but don't abort: PostGIS may already be enabled by the provider
         print(f"[entrypoint] PostGIS init warning (proceeding): {exc}", file=sys.stderr, flush=True)
 
 
 def _normalise_database_url() -> None:
-    """Railway injects postgresql://… — SQLAlchemy asyncpg needs postgresql+asyncpg://…"""
+    """Railway injects postgresql://…; SQLAlchemy asyncpg needs postgresql+asyncpg://…"""
     url = os.environ.get("DATABASE_URL", "")
     if url.startswith("postgresql://") and "+asyncpg" not in url:
         os.environ["DATABASE_URL"] = url.replace("postgresql://", "postgresql+asyncpg://", 1)

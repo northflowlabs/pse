@@ -197,7 +197,7 @@ class TestFusionEngineE2E:
 
     @pytest.mark.asyncio
     async def test_multi_source_variable_returns_merged(self, fusion_engine):
-        """temperature_2m is in both source_a and source_b — should be blended."""
+        """temperature_2m is in both source_a and source_b: should be blended."""
         ds = await fusion_engine.query(
             variables=["temperature_2m"],
             spatial=JAKARTA,

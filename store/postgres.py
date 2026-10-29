@@ -1,5 +1,5 @@
 """
-PSE PostgreSQL / PostGIS store — metadata, point observations, and spatial index.
+PSE PostgreSQL / PostGIS store: metadata, point observations, and spatial index.
 
 Used for:
   - Tracking ingest history (what was fetched, when, for which region)
@@ -160,7 +160,7 @@ class PSEDatabase:
         )
 
     async def init(self) -> None:
-        """Create all tables (idempotent — safe to call on every startup)."""
+        """Create all tables (idempotent, safe to call on every startup)."""
         async with self._engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         log.info("PSE database initialised")

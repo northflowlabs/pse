@@ -2,7 +2,7 @@
 
 Base URL: `https://pse.northflow.no/api/v1`
 
-All endpoints return JSON unless otherwise noted. Authentication via `Authorization: Bearer <jwt>` or `X-API-Key: <key>` header (configurable; development mode bypasses auth).
+All endpoints return JSON. Authentication uses the `X-API-Key: <key>` header. In development mode (`ENVIRONMENT=development`, the default) every request is accepted without a key.
 
 ---
 
@@ -10,19 +10,25 @@ All endpoints return JSON unless otherwise noted. Authentication via `Authorizat
 
 ### `GET /health`
 
-Returns system status, connector freshness, and storage availability.
+Returns database reachability, per-connector freshness and cache statistics. `status` is `ok` when the database and every connector respond, otherwise `degraded`.
 
 **Response**
 ```json
 {
-  "status": "healthy",
-  "environment": "production",
+  "status": "ok",
+  "timestamp": "2026-10-29T21:31:07Z",
+  "database": {"status": "ok"},
   "connectors": {
-    "era5": {"status": "ok", "latest": "2026-03-20T00:00:00Z"},
-    "open_meteo": {"status": "ok", "latest": "2026-03-21T06:00:00Z"}
+    "open_meteo": {
+      "status": "ok",
+      "latest_data_timestamp": "2026-10-29T21:00:00+00:00",
+      "lag_seconds": 1867.0,
+      "variables": ["temperature_2m", "..."],
+      "update_frequency_seconds": 3600
+    }
   },
-  "zarr_store": {"status": "ok", "path": "/data/zarr"},
-  "database": {"status": "ok"}
+  "cache": {"entries": 2, "max_entries": 256, "default_ttl": 3600.0, "expired": 2},
+  "version": "0.1.0"
 }
 ```
 
@@ -32,21 +38,21 @@ Returns system status, connector freshness, and storage availability.
 
 ### `GET /point`
 
-Query all available variables for a single lat/lon point.
+Timeseries of the requested variables at a single lat/lon point.
 
 **Parameters**
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | `lat` | float | Yes | Latitude (-90 to 90) |
-| `lon` | float | Required | Longitude (-180 to 180) |
-| `variables` | string | No | Comma-separated list (default: all) |
-| `start` | ISO-8601 | No | Start datetime (default: 7 days ago) |
-| `end` | ISO-8601 | No | End datetime (default: now) |
+| `lon` | float | Yes | Longitude (-180 to 180) |
+| `variables` | string | Yes | Comma-separated PSE variable names |
+| `time_start` | ISO-8601 | Yes | Start of time range (UTC) |
+| `time_end` | ISO-8601 | Yes | End of time range (UTC) |
 
 **Example**
 ```bash
-curl "https://pse.northflow.no/api/v1/point?lat=-8.5&lon=115.2&variables=temperature_2m,solar_ghi"
+curl "https://pse.northflow.no/api/v1/point?lat=-8.5&lon=115.2&variables=temperature_2m,solar_ghi&time_start=2025-01-01T00:00:00Z&time_end=2025-01-07T00:00:00Z"
 ```
 
 ---
@@ -61,14 +67,14 @@ Gridded query over a spatial bounding box.
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `min_lat` | float | Yes | Southern bound |
-| `max_lat` | float | Yes | Northern bound |
-| `min_lon` | float | Yes | Western bound |
-| `max_lon` | float | Yes | Eastern bound |
-| `variables` | string | No | Comma-separated list |
-| `start` | ISO-8601 | No | Start datetime |
-| `end` | ISO-8601 | No | End datetime |
-| `resolution` | float | No | Output resolution in degrees |
+| `variables` | string | Yes | Comma-separated PSE variable names |
+| `lat_min` | float | Yes | Southern bound |
+| `lat_max` | float | Yes | Northern bound |
+| `lon_min` | float | Yes | Western bound |
+| `lon_max` | float | Yes | Eastern bound |
+| `time_start` | ISO-8601 | Yes | Start of time range (UTC) |
+| `time_end` | ISO-8601 | Yes | End of time range (UTC) |
+| `resolution` | float | No | Target spatial resolution in metres |
 
 ---
 
@@ -76,17 +82,24 @@ Gridded query over a spatial bounding box.
 
 ### `POST /fuse`
 
-Explicitly request quality-weighted fusion across specified sources.
+Fetches the variables from every source that provides them, aligns them spatially and temporally, and returns a quality-weighted blend.
 
 **Request body**
 ```json
 {
   "variables": ["temperature_2m", "solar_ghi"],
-  "spatial": {"min_lat": -8.9, "max_lat": -8.1, "min_lon": 114.8, "max_lon": 115.7},
-  "temporal": {"start": "2024-01-01T00:00:00Z", "end": "2024-12-31T00:00:00Z"},
-  "sources": ["era5", "open_meteo"]
+  "lat_min": -8.9,
+  "lat_max": -8.1,
+  "lon_min": 114.8,
+  "lon_max": 115.7,
+  "time_start": "2024-01-01T00:00:00Z",
+  "time_end": "2024-01-31T00:00:00Z",
+  "resolution_m": 5000,
+  "prefer_recent": true
 }
 ```
+
+`resolution_m` (default 5000) and `prefer_recent` (default `true`) are optional.
 
 ---
 
@@ -94,8 +107,8 @@ Explicitly request quality-weighted fusion across specified sources.
 
 ### `GET /sources`
 
-List all registered connectors with their supported variables and status.
+Lists the registered connectors with their variables and update frequency, plus the full list of available variables.
 
 ### `GET /sources/{source_id}/status`
 
-Detailed status for a single connector including last fetch time, coverage, and quality metrics.
+Status of a single connector: latest data timestamp, lag in seconds, variables and update frequency.

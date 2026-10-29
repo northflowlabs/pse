@@ -1,5 +1,5 @@
 """
-PSE Zarr store — cloud-optimised array storage for gridded datasets.
+PSE Zarr store: cloud-optimised array storage for gridded datasets.
 
 Datasets are written once and read many times.  The store organises data by:
 

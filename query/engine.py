@@ -1,5 +1,5 @@
 """
-PSE Query Engine — orchestrates multi-source data retrieval and caching.
+PSE Query Engine: orchestrates multi-source data retrieval and caching.
 
 The QueryEngine is the central coordinator:
   1. Receives a query (variables, spatial, temporal, resolution).
@@ -7,7 +7,7 @@ The QueryEngine is the central coordinator:
   3. Checks the cache; fetches from connectors only for cache misses.
   4. Returns a unified xarray.Dataset with full provenance.
 
-This module is intentionally kept simple for Sprint 1 — single-source queries
+This module is intentionally kept simple for Sprint 1: single-source queries
 work end-to-end.  The full multi-source fusion engine (FusionEngine) is
 implemented separately in pse/fusion/ and layered on top.
 """
@@ -116,7 +116,7 @@ class QueryEngine:
                 f"Available variables: {sorted(self._var_index)}"
             )
 
-        # Phase 1 — try each primary-connector group in parallel
+        # Phase 1: try each primary-connector group in parallel
         async def _try_group(
             src_id: str, vars_: list[str]
         ) -> tuple[str, list[str], xr.Dataset | None, Exception | None]:
@@ -132,7 +132,7 @@ class QueryEngine:
             *[_try_group(sid, vrs) for sid, vrs in primary_groups.items()]
         )
 
-        # Phase 2 — collect successes; queue failed variables for fallback
+        # Phase 2: collect successes; queue failed variables for fallback
         datasets: list[xr.Dataset] = []
         connector_succeeded: dict[str, str] = {}        # var → source_id
         connector_failed: dict[str, list[str]] = {}     # var → [source_ids]
@@ -145,14 +145,14 @@ class QueryEngine:
                     connector_succeeded[v] = src_id
             else:
                 log.warning(
-                    "Connector %s failed for %s — will try alternatives. Error: %s",
+                    "Connector %s failed for %s: will try alternatives. Error: %s",
                     src_id, vars_, err,
                 )
                 for v in vars_:
                     connector_failed.setdefault(v, []).append(src_id)
                     needs_fallback.append(v)
 
-        # Phase 3 — sequential per-variable fallback for failed groups
+        # Phase 3: sequential per-variable fallback for failed groups
         for var in needs_fallback:
             already_tried = set(connector_failed.get(var, []))
             alternatives = [

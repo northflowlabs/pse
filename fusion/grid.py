@@ -23,7 +23,7 @@ def make_regular_grid(
     Build a regular lat/lon grid covering *spatial* at *resolution_m* metre spacing.
 
     Returns:
-        (lats, lons) — 1-D numpy arrays of coordinate values.
+        (lats, lons): 1-D numpy arrays of coordinate values.
     """
     deg_per_m = 1.0 / 111_000
     step = resolution_m * deg_per_m
@@ -54,7 +54,7 @@ def regrid_dataset(
     has_lon = "longitude" in ds.dims
 
     if not (has_lat and has_lon):
-        # Dataset has no spatial dimensions (e.g. point timeseries) — return as-is
+        # Dataset has no spatial dimensions (e.g. point timeseries): return as-is
         return ds
 
     native_lats = ds.latitude.values
@@ -75,7 +75,7 @@ def regrid_dataset(
     ]
 
     if len(clipped_lats) == 0 or len(clipped_lons) == 0:
-        # No overlap — return original
+        # No overlap: return original
         return ds
 
     try:

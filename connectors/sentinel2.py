@@ -1,19 +1,19 @@
 """
-Sentinel-2 connector — Copernicus Data Space Ecosystem (CDSE).
+Sentinel-2 connector: Copernicus Data Space Ecosystem (CDSE).
 
-Sentinel-2 provides multispectral optical imagery at 10–60 m resolution with a
+Sentinel-2 provides multispectral optical imagery at 10 to 60 m resolution with a
 ~5-day global revisit.  For PSE / FLUX, we use it to derive:
 
-  - NDVI  (Normalised Difference Vegetation Index)  — land cover, crop health
-  - NDWI  (Normalised Difference Water Index)       — water bodies, flood extent
-  - land_use_class                                   — coarse classification
-  - cloud_cover                                      — scene-level cloud fraction
+  - NDVI  (Normalised Difference Vegetation Index): land cover, crop health
+  - NDWI  (Normalised Difference Water Index): water bodies, flood extent
+  - land_use_class: coarse classification
+  - cloud_cover: scene-level cloud fraction
 
 Authentication:
   COPERNICUS_DATASPACE_CLIENT_ID / CLIENT_SECRET (OAuth2 client credentials).
   Register at: https://dataspace.copernicus.eu/
 
-CDSE STAC API: https://stac.dataspace.copernicus.eu/
+CDSE STAC API: https://stac.dataspace.copernicus.eu/v1
 OData API:     https://catalogue.dataspace.copernicus.eu/odata/v1
 """
 from __future__ import annotations
@@ -49,10 +49,10 @@ _RELIABILITY = 0.95
 # CDSE STAC collection identifier (lowercase with dashes)
 _S2_COLLECTION = "sentinel-2-l2a"
 
-# Skip band download if Content-Length exceeds this (bytes) — prevents OOM
+# Skip band download if Content-Length exceeds this (bytes): prevents OOM
 _MAX_BAND_BYTES = 50 * 1024 * 1024  # 50 MB
 
-# Band download timeout — must stay well below Railway's 60s proxy timeout
+# Band download timeout: must stay well below Railway's 60s proxy timeout
 _DOWNLOAD_TIMEOUT = 25.0
 
 # Band numbers for common Sentinel-2 L2A products
@@ -146,7 +146,7 @@ class Sentinel2Connector(BaseConnector):
         Find and retrieve the best Sentinel-2 scenes for the request.
 
         Returns a Dataset with one time step per scene found.
-        Raises ConnectorError on any failure — never raises anything else
+        Raises ConnectorError on any failure; it never raises anything else
         so the query engine's fallback system can handle it cleanly.
         """
         try:
@@ -365,7 +365,7 @@ class Sentinel2Connector(BaseConnector):
         """
         Download a single band asset and clip to spatial bounds.
 
-        Uses rasterio for reading Cloud-Optimised GeoTIFF (COG) assets —
+        Uses rasterio for reading Cloud-Optimised GeoTIFF (COG) assets;
         only the overlapping window is downloaded.
         """
         async with self._sem:
@@ -380,12 +380,12 @@ class Sentinel2Connector(BaseConnector):
                     tmp_path = tmp.name
 
                 async with httpx.AsyncClient(timeout=_DOWNLOAD_TIMEOUT, headers=headers) as client:
-                    # HEAD request first — skip files that are too large to be safe
+                    # HEAD request first: skip files that are too large to be safe
                     head = await client.head(href, follow_redirects=True)
                     content_length = int(head.headers.get("content-length", 0))
                     if content_length > _MAX_BAND_BYTES:
                         log.warning(
-                            "[sentinel2] Skipping band at %s — too large (%d MB)",
+                            "[sentinel2] Skipping band at %s: too large (%d MB)",
                             href, content_length // (1024 * 1024),
                         )
                         return None

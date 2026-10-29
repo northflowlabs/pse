@@ -1,5 +1,5 @@
 """
-PSE spatial query helpers — clipping, reprojection, bounding-box operations.
+PSE spatial query helpers: clipping, reprojection, bounding-box operations.
 """
 from __future__ import annotations
 
@@ -65,7 +65,7 @@ def point_query(
         ds:     Gridded dataset.
         lat:    Target latitude.
         lon:    Target longitude.
-        method: Interpolation method — 'nearest' or 'linear'.
+        method: Interpolation method, 'nearest' or 'linear'.
 
     Returns:
         Dataset with latitude and longitude dimensions dropped (timeseries only).

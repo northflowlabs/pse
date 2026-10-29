@@ -1,5 +1,5 @@
 """
-Tests for the BaseConnector data classes — SpatialBounds, TemporalBounds, DataQuality.
+Tests for the BaseConnector data classes: SpatialBounds, TemporalBounds, DataQuality.
 """
 from __future__ import annotations
 
