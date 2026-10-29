@@ -1,32 +1,19 @@
-<div align="center">
-  <img src="docs/images/northflow-logo.png" alt="Northflow Technologies" width="80">
+<a href="https://northflow.no"><img src=".github/assets/northflow-mark.svg" alt="Northflow" width="40" height="40"></a>
 
-  # Northflow PSE
+# PSE
 
-  ### Planetary Sensing Engine
+PSE (Planetary Sensing Engine) is an open source Python framework that fuses Earth observation and environmental data into one queryable API.
 
-  **Domain-agnostic spatiotemporal data fusion for Earth observation, climate science, and planetary intelligence.**
+[Research page](https://research.northflow.no/systems/pse) · [Hosted API](https://pse.northflow.no/docs) · [Docs](docs/) · [API reference](docs/api-reference.md) · [Examples](examples/) · [Licence](#licence)
 
-  [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-  [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://python.org)
-  [![Tests](https://img.shields.io/github/actions/workflow/status/northflowlabs/pse/ci.yml?label=tests)](https://github.com/northflowlabs/pse/actions)
-  [![Pangeo](https://img.shields.io/badge/ecosystem-Pangeo-blue)](https://pangeo.io)
+[![Tests](https://img.shields.io/github/actions/workflow/status/northflowlabs/pse/ci.yml?label=tests)](https://github.com/northflowlabs/pse/actions/workflows/ci.yml)
+[![Licence: Apache 2.0](https://img.shields.io/badge/licence-Apache%202.0-0e6b63)](LICENSE)
 
-  [Documentation](docs/) · [API Reference](docs/api-reference.md) · [Examples](examples/) · [Contributing](.github/CONTRIBUTING.md)
+## What PSE does
 
-</div>
+Earth observation data is spread across providers, formats, coordinate systems and time resolutions. Combining ERA5 reanalysis with Sentinel-2 imagery, OpenStreetMap infrastructure and World Bank statistics usually takes domain expertise and a lot of glue code.
 
----
-
-**Northflow Technologies** builds institutional scientific discovery infrastructure for climate, Earth observation, and critical systems. PSE is our open-source data foundation — the sensing and data fusion layer of the Northflow platform.
-
-## What is PSE?
-
-PSE (Planetary Sensing Engine) is an open-source Python framework that ingests data from multiple Earth observation and environmental data sources, normalises them into a unified spatiotemporal model, and makes them queryable through a single API.
-
-**The problem:** Earth observation data is fragmented across dozens of providers, formats, coordinate systems, and temporal resolutions. Combining ERA5 reanalysis with Sentinel-2 imagery, OpenStreetMap infrastructure data, and World Bank statistics requires deep domain expertise and thousands of lines of boilerplate code.
-
-**PSE solves this** by providing a unified `BaseConnector` interface for any data source, a quality-weighted fusion engine that intelligently combines overlapping sources, and a REST API that serves fused data as standard `xarray.Dataset` objects — fully compatible with the Pangeo ecosystem.
+PSE ingests these sources through one `BaseConnector` interface, normalises them into a single spatiotemporal model, blends overlapping sources by quality score, and serves the result through a REST API as standard `xarray.Dataset` objects that work with the Pangeo ecosystem.
 
 ```python
 from pse.query.engine import QueryEngine
@@ -49,15 +36,15 @@ print(ds)
 # Attributes:  pse_sources: ['era5', 'open_meteo', 'global_solar_atlas']
 ```
 
-## Key Features
+## Features
 
-- **6 built-in connectors** — ERA5 (ECMWF), Open-Meteo, Global Solar Atlas, Sentinel-2 (Copernicus CDSE), OpenStreetMap, World Bank
-- **Quality-weighted fusion** — When multiple sources provide the same variable, PSE blends them using quality scores (reliability × recency), not majority vote
-- **Pangeo-native** — All data flows through `xarray.Dataset` with CF-conventions metadata. Works with Dask, Zarr, and the full Pangeo stack
-- **Full provenance** — Every API response traces data back to its original source, transformation history, and quality assessment
-- **Extensible** — Add new data sources by implementing the `BaseConnector` abstract class (~100 lines of Python)
-- **REST API** — FastAPI-based endpoints for point queries, bounding-box queries, multi-source fusion, and data export
-- **Cloud-ready** — Zarr storage on local disk or S3. PostgreSQL/PostGIS for spatial metadata. Docker Compose for single-command deployment
+- **Six connectors:** ERA5 (ECMWF), Open-Meteo, Global Solar Atlas, Sentinel-2 (Copernicus CDSE), OpenStreetMap and World Bank
+- **Quality-weighted fusion:** where several sources provide the same variable, PSE blends them by quality score (reliability and recency)
+- **Pangeo compatible:** all data flows through `xarray.Dataset` with CF-convention metadata and works with Dask and Zarr
+- **Provenance:** every API response traces data back to its source, its transformations and its quality assessment
+- **Extensible:** a new data source is one `BaseConnector` subclass, about 100 lines of Python
+- **REST API:** FastAPI endpoints for point queries, bounding-box queries, multi-source fusion and export
+- **Storage:** Zarr on local disk or S3, PostgreSQL and PostGIS for spatial metadata
 
 ## Architecture
 
@@ -98,11 +85,12 @@ cp .env.example .env
 ### Run the API
 
 ```bash
-# With Docker (includes PostgreSQL + PostGIS)
-docker compose up
-
-# Or directly
+# Directly
 uvicorn pse.api.main:app --host 0.0.0.0 --port 8001
+
+# Or with Docker
+docker build -t pse .
+docker run -p 8001:8000 --env-file .env pse
 ```
 
 ### Query a point
@@ -118,13 +106,13 @@ curl "http://localhost:8001/api/v1/point?lat=-8.5&lon=115.2&variables=temperatur
 | [ERA5](https://cds.climate.copernicus.eu/) | Temperature, wind, solar radiation, precipitation | 0.25° (~28 km) | Daily (5-day lag) | Yes (free) |
 | [Open-Meteo](https://open-meteo.com/) | Temperature, wind, humidity, pressure, GHI | 0.25° | Hourly | No |
 | [Global Solar Atlas](https://globalsolaratlas.info/) | GHI, DNI, DIF (long-term climatology) | ~1 km | Static | No |
-| [Sentinel-2](https://dataspace.copernicus.eu/) | NDVI, NDWI, land-use classification | 10–60 m | 5-day revisit | Yes (free) |
+| [Sentinel-2](https://dataspace.copernicus.eu/) | NDVI, NDWI, land-use classification | 10 to 60 m | 5-day revisit | Yes (free) |
 | [OpenStreetMap](https://www.openstreetmap.org/) | Substations, power lines, roads, settlements | Vector | Weekly | No |
 | [World Bank](https://data.worldbank.org/) | Electrification rate, GDP/capita, RE share | Country-level | Monthly | No |
 
 ## Writing a New Connector
 
-PSE is designed to be extended. To add a new data source, implement the `BaseConnector` interface:
+To add a new data source, implement the `BaseConnector` interface:
 
 ```python
 from pse.connectors.base import BaseConnector, SpatialBounds, TemporalBounds, DataQuality
@@ -161,29 +149,16 @@ See [docs/connectors.md](docs/connectors.md) for the full guide.
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/v1/health` | GET | System health, connector status, data freshness |
-| `/api/v1/point` | GET | Point query — single lat/lon, multiple variables |
-| `/api/v1/query` | GET | Bounding-box query — gridded data as JSON |
+| `/api/v1/point` | GET | Point query: one lat/lon, several variables |
+| `/api/v1/query` | GET | Bounding-box query: gridded data as JSON |
 | `/api/v1/fuse` | POST | Multi-source quality-weighted fusion |
 | `/api/v1/sources` | GET | List all available data sources |
 | `/api/v1/sources/{id}/status` | GET | Detailed status for a single source |
 
-## Part of the Northflow Platform
+## Related
 
-PSE is one of several engines in Northflow's planetary intelligence infrastructure. Each engine serves a different function:
-
-| Engine | Function | Status |
-|--------|----------|--------|
-| **PSE** | Planetary Sensing Engine — ingests, fuses, and serves Earth observation data | Open source (this repo) |
-| **HGE** | Hypothesis Generation Engine — generates and ranks scientific hypotheses from data | Core platform |
-
-Domain adapters connect to whichever engines they need:
-
-- **FLUX** — Renewable energy siting and yield prediction · *built on PSE*
-- **CERES** — Humanitarian crisis and famine early warning · *built on HGE* · [arXiv:2603.09425](https://arxiv.org/abs/2603.09425)
-- **MARVIS** — Maritime domain intelligence · *built on HGE*
-- **ClimVal** — Climate model validation · [PyPI](https://pypi.org/project/climval/)
-
-As the platform matures, adapters will draw from multiple engines simultaneously — PSE for data, HGE for hypotheses.
+- [climval](https://github.com/northflowlabs/climval) validates climate model output against reference data. `pip install climval`
+- [Northflow Space and Research](https://research.northflow.no) describes the systems PSE belongs to.
 
 ## Testing
 
@@ -201,28 +176,20 @@ pytest --cov=pse --cov-report=html
 ## Citation
 
 Pedersen, Tom Danny S. (2026). Northflow PSE: Planetary Sensing Engine.
-GitHub. https://github.com/northflowlabs/pse
+GitHub. https://github.com/northflowlabs/pse. See [CITATION.cff](CITATION.cff).
 
 ## Contributing
 
-We welcome contributions. See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for guidelines.
+We welcome contributions. See [CONTRIBUTING.md](.github/CONTRIBUTING.md).
 
 Priority areas:
-- New data source connectors (ocean, agricultural, air quality)
-- Performance optimisation for large spatial extents
-- Additional export formats (COG, STAC)
-- Documentation improvements
+- New data source connectors (ocean, agriculture, air quality)
+- Performance for large spatial extents
+- More export formats (COG, STAC)
+- Documentation
 
-## License
+## Licence
 
-Apache License 2.0. See [LICENSE](LICENSE) for details.
+PSE is licensed under the [Apache License 2.0](LICENSE).
 
----
-
-<div align="center">
-
-**[Northflow Technologies AS](https://northflow.no)** · Stavanger, Norway
-
-*Building the intelligence infrastructure for Planet Earth.*
-
-</div>
+Copyright 2026 Northflow Technologies AS

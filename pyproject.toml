@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "northflow-pse"
 version = "0.1.0"
-description = "Planetary Sensing Engine — domain-agnostic spatiotemporal data fusion for Earth observation"
+description = "Planetary Sensing Engine: spatiotemporal data fusion for Earth observation"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11"
