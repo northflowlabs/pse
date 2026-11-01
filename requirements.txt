@@ -7,7 +7,7 @@ fsspec>=2024.10.0
 s3fs>=2024.10.0
 netcdf4>=1.7.0
 numpy>=1.26.0
-scipy>=1.11.0
+scipy>=1.17.1
 pandas>=2.2.0
 geopandas>=1.0.0
 shapely>=2.0.0
@@ -22,7 +22,7 @@ geoalchemy2>=0.15.0
 pydantic>=2.10.0
 pydantic-settings>=2.6.0
 apscheduler>=3.10.0
-python-jose[cryptography]>=3.3.0
+python-jose[cryptography]>=3.5.0
 structlog>=24.4.0
 pyyaml>=6.0.0
 
